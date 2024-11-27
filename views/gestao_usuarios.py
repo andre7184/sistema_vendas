@@ -23,6 +23,7 @@ class GestaoUsuarios(tk.Frame):
 
     def editar_usuario(self, usuario):
         self.clear_frame()
+        print(f"Editar usuário: {usuario}")
         self.cadastro_usuario_frame = CadastroUsuario(self, self.usuario_controller, usuario)
         self.cadastro_usuario_frame.pack()
 

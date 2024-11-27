@@ -62,7 +62,7 @@ class App(tk.Tk):
         self.gestao_usuarios_frame = GestaoUsuarios(self, self.usuario_controller)
         self.gestao_usuarios_frame.pack()
         # Atualizar a lista de usuários automaticamente ao abrir a tela
-        self.gestao_usuarios_frame.atualizar_lista()
+        # self.gestao_usuarios_frame.atualizar_lista()
 
     def show_gestao_produtos(self):
         self.clear_frame()

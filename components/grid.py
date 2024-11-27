@@ -10,44 +10,34 @@ class Grid(tk.Frame):
         self.create_widgets(colunas, dados)
 
     def create_widgets(self, colunas, dados):
-        self.tree = ttk.Treeview(self, columns=colunas, show="headings")
-        
-        # Configurando a largura das colunas
-        for coluna in colunas:
-            self.tree.column(coluna, width=150, anchor=tk.W)
-            self.tree.heading(coluna, text=coluna)
-        
-        # Adicionando a coluna de ações
-        self.tree["columns"] = colunas + ["Ações"]
-        self.tree.column("Ações", width=150, anchor=tk.CENTER)
-        self.tree.heading("Ações", text="Ações")
-        self.tree.pack(fill=tk.BOTH, expand=True)
+        # Adiciona a coluna 'Ações' às colunas
+        colunas.append('Ações')
 
-        self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
-        self.tree.configure(yscroll=self.scrollbar.set)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # Cria um frame para a tabela
+        frame = ttk.Frame(self)
+        frame.pack(fill=tk.X, expand=True, padx=10, pady=10, anchor='n')
 
-        self.atualizar_lista(dados)
+        # Cria os cabeçalhos da tabela
+        for col in range(len(colunas)):
+            header = ttk.Label(frame, text=colunas[col], borderwidth=1, relief="solid")
+            header.grid(row=0, column=col, sticky="nsew")
 
-    def atualizar_lista(self, dados):
-        for row in self.tree.get_children():
-            self.tree.delete(row)
-        for item in dados:
-            item_id = self.tree.insert("", tk.END, values=item)
-            self.add_action_buttons(item_id)
+        # Cria as linhas da tabela com botões Editar e Excluir na última coluna
+        for row in range(1, len(dados) + 1):
+            for col in range(len(colunas)):
+                if col == len(colunas) - 1:
+                    action_frame = ttk.Frame(frame)
+                    edit_button = ttk.Button(action_frame, text="Editar", command=lambda r=row: self.editar_callback(dados[r-1]))
+                    delete_button = ttk.Button(action_frame, text="Excluir", command=lambda r=row: self.excluir_callback(dados[r-1]))
+                    edit_button.pack(side=tk.LEFT)
+                    delete_button.pack(side=tk.LEFT)
+                    action_frame.grid(row=row, column=col, sticky="nsew")
+                else:
+                    cell = ttk.Label(frame, text=dados[row-1][col], borderwidth=1, relief="solid")
+                    cell.grid(row=row, column=col, sticky="nsew")
 
-    def add_action_buttons(self, item_id):
-        frame = tk.Frame(self.tree)
-        btn_editar = tk.Button(frame, text="Editar", command=lambda: self.editar_callback(self.tree.item(item_id)["values"]))
-        btn_excluir = tk.Button(frame, text="Excluir", command=lambda: self.excluir_callback(self.tree.item(item_id)["values"]))
-        btn_editar.pack(side=tk.LEFT)
-        btn_excluir.pack(side=tk.LEFT)
-        self.tree.set(item_id, "Ações", "")
-        self.tree.item(item_id, tags=(item_id,))
-        self.tree.tag_bind(item_id, "<Button-1>", lambda event, frame=frame: self.show_action_buttons(event, frame, item_id))
-
-    def show_action_buttons(self, event, frame, item_id):
-        bbox = self.tree.bbox(item_id, column="Ações")
-        if bbox:
-            x, y, width, height = bbox
-            frame.place(x=x, y=y, width=width, height=height)
+        # Configura o peso das colunas e linhas para expandir as células da tabela
+        for col in range(len(colunas)):
+            frame.grid_columnconfigure(col, weight=1)
+        for row in range(len(dados) + 1):
+            frame.grid_rowconfigure(row, weight=1)

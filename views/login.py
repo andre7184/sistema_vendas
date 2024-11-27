@@ -29,7 +29,6 @@ class Login(tk.Frame):
         usuario = self.usuario_controller.autenticar_usuario(login, senha)
         print(usuario)
         if usuario:
-            messagebox.showinfo("Sucesso", "Login realizado com sucesso!")
             self.on_login_success(usuario)
         else:
             messagebox.showerror("Erro", "Login ou senha incorretos")

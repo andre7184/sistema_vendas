@@ -23,3 +23,9 @@ class FormularioCadastro(tk.Frame):
     def salvar_dados(self):
         dados = {campo: entry.get() for campo, entry in self.entries.items()}
         self.salvar_callback(dados)
+
+    def set_dados(self, dados):
+        for campo, valor in dados.items():
+            if campo in self.entries:
+                self.entries[campo].delete(0, tk.END)
+                self.entries[campo].insert(0, valor)

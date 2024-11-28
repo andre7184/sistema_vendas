@@ -10,19 +10,15 @@ class Grid(tk.Frame):
         self.create_widgets(colunas, dados)
 
     def create_widgets(self, colunas, dados):
-        # Adiciona a coluna 'Ações' às colunas
         colunas.append('Ações')
 
-        # Cria um frame para a tabela
         frame = ttk.Frame(self)
         frame.pack(fill=tk.X, expand=True, padx=10, pady=10, anchor='n')
 
-        # Cria os cabeçalhos da tabela
         for col in range(len(colunas)):
             header = ttk.Label(frame, text=colunas[col], borderwidth=1, relief="solid")
             header.grid(row=0, column=col, sticky="nsew")
 
-        # Cria as linhas da tabela com botões Editar e Excluir na última coluna
         for row in range(1, len(dados) + 1):
             for col in range(len(colunas)):
                 if col == len(colunas) - 1:
@@ -36,7 +32,6 @@ class Grid(tk.Frame):
                     cell = ttk.Label(frame, text=dados[row-1][col], borderwidth=1, relief="solid")
                     cell.grid(row=row, column=col, sticky="nsew")
 
-        # Configura o peso das colunas e linhas para expandir as células da tabela
         for col in range(len(colunas)):
             frame.grid_columnconfigure(col, weight=1)
         for row in range(len(dados) + 1):

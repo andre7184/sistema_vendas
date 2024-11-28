@@ -6,7 +6,12 @@ class CadastroUsuario(tk.Frame):
         super().__init__(master)
         self.usuario_controller = usuario_controller
         self.usuario = usuario
-        campos = ["Nome", "CPF", "Endereço", "Login", "Senha", "Tipo"]
+        campos = {
+            "Nome": {"tipo": "entry"},
+            "Login": {"tipo": "entry"},
+            "Senha": {"tipo": "password"},
+            "Tipo": {"tipo": "select", "options": ["Administrador", "Vendedor"]}
+        }
         
         self.formulario = FormularioCadastro(self, campos, self.salvar_usuario)
         
@@ -16,8 +21,6 @@ class CadastroUsuario(tk.Frame):
     def preencher_dados(self, usuario):
         self.formulario.set_dados({
             "Nome": usuario.nome,
-            "CPF": usuario.cpf,
-            "Endereço": usuario.endereco,
             "Login": usuario.login,
             "Senha": usuario.senha,
             "Tipo": usuario.tipo
@@ -25,15 +28,19 @@ class CadastroUsuario(tk.Frame):
 
     def salvar_usuario(self, dados):
         nome = dados["Nome"]
-        cpf = dados["CPF"]
-        endereco = dados["Endereço"]
         login = dados["Login"]
         senha = dados["Senha"]
         tipo = dados["Tipo"]
         
-        if self.usuario:
-            # Atualizar o usuário existente
-            self.usuario_controller.atualizar_usuario(self.usuario.id, nome, cpf, endereco, login, senha, tipo)
-        else:
-            # Cadastrar um novo usuário
-            self.usuario_controller.cadastrar_usuario(nome, cpf, endereco, login, senha, tipo)
+        try:
+            if self.usuario:
+                self.usuario_controller.atualizar_usuario(self.usuario.id, nome, login, senha, tipo)
+                mensagem = "Usuário atualizado com sucesso!"
+            else:
+                self.usuario_controller.cadastrar_usuario(nome, login, senha, tipo)
+                mensagem = "Usuário cadastrado com sucesso!"
+            self.master.atualizar_lista()
+            self.master.mostrar_mensagem(mensagem, "sucesso")
+        except Exception as e:
+            mensagem = f"Erro ao salvar usuário: {str(e)}"
+            self.formulario.mostrar_mensagem(mensagem, "erro")

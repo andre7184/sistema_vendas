@@ -6,9 +6,15 @@ class CadastroProduto(tk.Frame):
         super().__init__(master)
         self.produto_controller = produto_controller
         self.produto = produto
-        campos = ["Nome", "Descrição", "Quantidade", "Valor"]
+        campos = {
+            "Nome": {"tipo": "entry"},
+            "Descrição": {"tipo": "entry"},
+            "Quantidade": {"tipo": "integer"},
+            "Valor": {"tipo": "real"}
+        }
         
         self.formulario = FormularioCadastro(self, campos, self.salvar_produto)
+        
         
         if produto:
             self.preencher_dados(produto)
@@ -26,10 +32,15 @@ class CadastroProduto(tk.Frame):
         descricao = dados["Descrição"]
         quantidade = int(dados["Quantidade"])
         valor = float(dados["Valor"])
-        
-        if self.produto:
-            # Atualizar o produto existente
-            self.produto_controller.atualizar_produto(self.produto.id, nome, descricao, quantidade, valor)
-        else:
-            # Cadastrar um novo produto
-            self.produto_controller.cadastrar_produto(nome, descricao, quantidade, valor)
+        try:
+            if self.produto:
+                self.produto_controller.atualizar_usuario(self.produto.id, nome, descricao, quantidade, valor)
+                mensagem = "Produto atualizado com sucesso!"
+            else:
+                self.produto_controller.cadastrar_usuario(nome, descricao, quantidade, valor)
+                mensagem = "Produto cadastrado com sucesso!"
+            self.master.atualizar_lista()
+            self.master.mostrar_mensagem(mensagem, "sucesso")
+        except Exception as e:
+            mensagem = f"Erro ao salvar Produto: {str(e)}"
+            self.formulario.mostrar_mensagem(mensagem, "erro")

@@ -71,8 +71,14 @@ class Grid(tk.Frame):
                 self.grid_widgets.append(cell)
 
     def remove_row(self, dados):
+        print(dados)
         frame = self.winfo_children()[0]  # Obtém o frame principal
+        row_widgets = []
         for widget in frame.winfo_children():
             if isinstance(widget, ttk.Label) and widget.cget("text") == dados[0]:  # Verifica se a linha corresponde ao ID do produto
-                widget.destroy()
-                self.grid_widgets.remove(widget)
+                row = widget.grid_info()["row"]
+                row_widgets = [w for w in frame.winfo_children() if w.grid_info()["row"] == row]
+                break
+        for widget in row_widgets:
+            widget.destroy()
+            self.grid_widgets.remove(widget)

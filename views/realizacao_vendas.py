@@ -35,7 +35,6 @@ class RealizacaoVendas(tk.Frame):
         # Frame para exibir os dados do cliente selecionado
         self.frame_dados_cliente = tk.Frame(self.frame_venda)
         
-
         # Label para exibir os dados do cliente selecionado
         self.label_dados_cliente = tk.Label(self.frame_dados_cliente, text="", font=("Arial", 12))
         self.label_dados_cliente.pack(side=tk.LEFT, padx=5)
@@ -68,7 +67,13 @@ class RealizacaoVendas(tk.Frame):
         self.btn_adicionar_produto = tk.Button(self.frame_adicionar_produto, text="Adicionar Produto", command=self.adicionar_produto, state=tk.DISABLED)
         self.btn_adicionar_produto.pack(side=tk.LEFT, padx=5)
 
-        # Frame para Treeview com Scrollbar do PRODUTO SELECIONADO
+        # Frame para exibir os produto selecionados com altura fixa e com scrollbar
+        self.frame_gred_view = tk.Frame(self.frame_venda)
+        self.frame_gred_view.pack(pady=5, fill=tk.X, expand=True)
+        # adiciona um scrollbar ao frame_gred_view
+        scrollbar = tk.Scrollbar(self.frame_gred_view)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
 
         # Mostrar quantidade de produtos e valor total ao final da tabela
         self.total_frame = tk.Frame(self.frame_venda)
@@ -199,14 +204,14 @@ class RealizacaoVendas(tk.Frame):
         if hasattr(self, 'grid_produtos'):
             self.grid_produtos.destroy()
 
-        self.grid_produtos = Grid(self.frame_venda, colunas, dados, None, self.excluir_produto, condicao_especial=True)
+        self.grid_produtos = Grid(self.frame_gred_view, colunas, dados, None, self.excluir_produto, condicao_especial=True)
         self.grid_produtos.pack(pady=5, fill=tk.BOTH, expand=True)
         self.atualizar_totais()  # Atualiza os totais após atualizar a grade
 
     def excluir_produto(self, produto):
         self.produtos_selecionados = [p for p in self.produtos_selecionados if p != produto]
         self.grid_produtos.remove_row(produto)
-        self.atualizar_totais()  # Atualiza os totais após remover o produto
+        self.atualizar_totais()  
 
     def atualizar_totais(self):
         total_quantidade = sum(int(produto[2]) for produto in self.produtos_selecionados)

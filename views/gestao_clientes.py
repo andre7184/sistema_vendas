@@ -19,10 +19,24 @@ class GestaoClientes(tk.Frame):
         self.mensagem_label = tk.Label(self, text="", fg="red")
         self.mensagem_label.pack()
 
-        self.lista_clientes = Grid(self, colunas, self.dados, self.editar_cliente, self.excluir_cliente)
-        
-        self.btn_cadastrar_cliente = tk.Button(self, text="Cadastrar Cliente", command=self.cadastrar_cliente)
-        self.btn_cadastrar_cliente.pack(pady=10)
+        # Criar frame para os botões
+        button_frame = tk.Frame(self)
+        button_frame.pack(fill=tk.X)
+
+        self.btn_cadastrar_cliente = tk.Button(button_frame, text="Cadastrar Cliente", command=self.cadastrar_cliente)
+        self.btn_cadastrar_cliente.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.btn_editar_cliente = tk.Button(button_frame, text="Editar Cliente", state=tk.DISABLED, command=self.editar_cliente_selecionado)
+        self.btn_editar_cliente.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.btn_excluir_cliente = tk.Button(button_frame, text="Excluir Cliente", state=tk.DISABLED, command=self.excluir_cliente_selecionado)
+        self.btn_excluir_cliente.pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Criar a grid
+        self.lista_clientes = Grid(self, colunas, self.dados)
+
+        # Vincular evento de seleção na grid para ativar/desativar botões
+        self.lista_clientes.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
 
     def cadastrar_cliente(self):
         self.clear_frame()
@@ -39,6 +53,17 @@ class GestaoClientes(tk.Frame):
         self.cliente_controller.excluir_cliente(cliente[0])  # Usando o ID para exclusão
         self.atualizar_lista()
 
+    def editar_cliente_selecionado(self):
+        selected_item = self.lista_clientes.tree.selection()[0]
+        cliente_id = self.lista_clientes.tree.item(selected_item)['values'][0]
+        cliente_obj = self.cliente_controller.buscar_cliente_por_id(cliente_id)
+        self.editar_cliente((cliente_obj.id, cliente_obj.nome, cliente_obj.cpf, cliente_obj.endereco))
+
+    def excluir_cliente_selecionado(self):
+        selected_item = self.lista_clientes.tree.selection()[0]
+        cliente_id = self.lista_clientes.tree.item(selected_item)['values'][0]
+        self.excluir_cliente((cliente_id,))
+
     def clear_frame(self):
         for widget in self.winfo_children():
             widget.pack_forget()
@@ -52,3 +77,11 @@ class GestaoClientes(tk.Frame):
             self.mensagem_label.config(text=mensagem, fg="green")
         else:
             self.mensagem_label.config(text=mensagem, fg="red")
+
+    def on_tree_select(self, event):
+        if self.lista_clientes.tree.selection():
+            self.btn_editar_cliente.config(state=tk.NORMAL)
+            self.btn_excluir_cliente.config(state=tk.NORMAL)
+        else:
+            self.btn_editar_cliente.config(state=tk.DISABLED)
+            self.btn_excluir_cliente.config(state=tk.DISABLED)

@@ -2,150 +2,124 @@ import tkinter as tk
 from tkinter import ttk
 
 class Grid(tk.Frame):
-    def __init__(self, master, colunas, dados, editar_callback, excluir_callback, condicao_especial=False):
+    def __init__(self, master, colunas, dados, condicao_especial=False):
         super().__init__(master)
-        self.editar_callback = editar_callback
-        self.excluir_callback = excluir_callback
         self.condicao_especial = condicao_especial
-        self.colunas = colunas
-        self.grid_widgets = []
+        self.colunas = colunas  # Inicializa self.colunas
         self.pack(fill=tk.BOTH, expand=True)
         self.create_widgets(colunas, dados)
 
     def create_widgets(self, colunas, dados):
-        colunas.append('Ações')
+        frame = ttk.Frame(self)
+        frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Cria um Canvas e uma Scrollbar
-        canvas = tk.Canvas(self)
-        scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
+        # Criar a árvore (treeview)
+        self.tree = ttk.Treeview(frame, columns=colunas, show='headings')
+        for col in colunas:
+            self.tree.heading(col, text=col)
+            if col == 'ID':
+                self.tree.column(col, anchor=tk.CENTER, width=50)  # Ajustar a largura da coluna ID
+            else:
+                self.tree.column(col, anchor=tk.CENTER)
 
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(
-                scrollregion=canvas.bbox("all")
-            )
-        )
+        # Adicionar dados à árvore
+        for row in dados:
+            self.tree.insert('', tk.END, values=row)
 
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        # Adicionar barras de rolagem
+        vsb = ttk.Scrollbar(frame, orient="vertical", command=self.tree.yview)
+        hsb = ttk.Scrollbar(frame, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
 
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # Posicionar a árvore e as barras de rolagem
+        self.tree.grid(row=0, column=0, sticky='nsew')
+        vsb.grid(row=0, column=1, sticky='ns')
+        hsb.grid(row=1, column=0, sticky='ew')
 
-        # Ajuste para expandir horizontalmente
-        self.bind("<Configure>", lambda e: canvas.config(scrollregion=canvas.bbox("all")))
-
-        # Adiciona o frame ao scrollable_frame
-        frame = ttk.Frame(scrollable_frame)
-        frame.pack(fill=tk.X, expand=True, padx=10, pady=10, anchor='n')
-
-        for col in range(len(colunas)):
-            header = ttk.Label(frame, text=colunas[col], borderwidth=1, relief="solid", font=("Arial", 10, "bold"))
-            header.grid(row=0, column=col, sticky="nsew")
-            self.grid_widgets.append(header)
-
-        for row in range(1, len(dados) + 1):
-            for col in range(len(colunas)):
-                if col == len(colunas) - 1:
-                    action_frame = ttk.Frame(frame)
-                    if not self.condicao_especial:
-                        edit_button = ttk.Button(action_frame, text="Editar", command=lambda r=row: self.editar_callback(dados[row-1]))
-                        edit_button.pack(side=tk.LEFT)
-                    
-                    delete_button = ttk.Button(action_frame, text="Excluir", command=lambda r=row: self.excluir_callback(dados[row-1]))
-                    delete_button.pack(side=tk.LEFT)
-                    action_frame.grid(row=row, column=col, sticky="nsew")
-                    self.grid_widgets.append(action_frame)
-                elif self.condicao_especial and colunas[col] in ["Quantidade", "Desconto"]:
-                    entry = tk.Entry(frame)
-                    entry.insert(0, dados[row-1][col])
-                    entry.grid(row=row, column=col, sticky="nsew")
-                    self.grid_widgets.append(entry)
-                else:
-                    cell = ttk.Label(frame, text=dados[row-1][col], borderwidth=1, relief="solid")
-                    cell.grid(row=row, column=col, sticky="nsew")
-                    self.grid_widgets.append(cell)
-
-        # Configura a expansão horizontal das colunas
-        for col in range(len(colunas)):
-            frame.grid_columnconfigure(col, weight=1)
-        for row in range(len(dados) + 1):
-            frame.grid_rowconfigure(row, weight=1)
+        # Configurar redimensionamento
+        frame.grid_rowconfigure(0, weight=1)
+        frame.grid_columnconfigure(0, weight=1)
 
     def add_row(self, dados):
-        frame = self.winfo_children()[0].winfo_children()[0].winfo_children()[0]  # Obtém o frame principal
-        row = len(self.grid_widgets) // len(self.colunas)  # Calcula a próxima linha
-        for col in range(len(self.colunas)):
-            if col == len(self.colunas) - 1:
-                action_frame = ttk.Frame(frame)
-                if not self.condicao_especial:
-                    edit_button = ttk.Button(action_frame, text="Editar", command=lambda r=row: self.editar_callback(dados))
-                    edit_button.pack(side=tk.LEFT)
+        self.tree.insert('', tk.END, values=dados)
 
-                delete_button = ttk.Button(action_frame, text="Excluir", command=lambda r=row: self.excluir_callback(dados))
-                delete_button.pack(side=tk.LEFT)
-                action_frame.grid(row=row, column=col, sticky="nsew")
-                self.grid_widgets.append(action_frame)
-            elif self.condicao_especial and self.colunas[col] in ["Quantidade", "Desconto"]:
-                entry = tk.Entry(frame)
-                entry.insert(0, dados[col])
-                entry.grid(row=row, column=col, sticky="nsew")
-                self.grid_widgets.append(entry)
-            else:
-                cell = ttk.Label(frame, text=dados[col], borderwidth=1, relief="solid")
-                cell.grid(row=row, column=col, sticky="nsew")
-                self.grid_widgets.append(cell)
+    def remove_row(self):
+        selected_item = self.tree.selection()[0]
+        self.tree.delete(selected_item)
 
-    def remove_row(self, dados):
-        print(dados)
-        frame = self.winfo_children()[0].winfo_children()[0].winfo_children()[0]  # Obtém o frame principal
-        row_widgets = []
-        for widget in frame.winfo_children():
-            if isinstance(widget, ttk.Label) and widget.cget("text") == dados[0]:  # Verifica se a linha corresponde ao ID do produto
-                row = widget.grid_info()["row"]
-                row_widgets = [w for w in frame.winfo_children() if w.grid_info()["row"] == row]
-                break
-        for widget in row_widgets:
-            widget.destroy()
-            self.grid_widgets.remove(widget)
+# Funções de callback para edição e exclusão
+def editar_callback():
+    selected_item = grid.tree.selection()[0]
+    values = grid.tree.item(selected_item, 'values')
+    print(f"Editar: {values}")
+    # Aqui você pode adicionar a lógica para editar os dados
 
-# Define as colunas e os dados
-columns = ['Nome', 'CPF', 'Endereço', 'Login', 'Tipo']
+def excluir_callback():
+    selected_item = grid.tree.selection()[0]
+    values = grid.tree.item(selected_item, 'values')
+    print(f"Excluir: {values}")
+    grid.remove_row()
+    # Aqui você pode adicionar a lógica para remover os dados da lista original
+
+# Função para adicionar uma nova linha
+def add_new_row():
+    new_data = [19, 'Novo', '00000000000', 'Novo Endereço', 'novo', 'comum']
+    grid.add_row(new_data)
+
+# Criar a janela principal
+root = tk.Tk()
+root.title("Tabela com Tkinter")
+root.geometry("800x600")
+
+# Criar botões de ação
+button_frame = tk.Frame(root)
+button_frame.pack(fill=tk.X)
+
+add_btn = tk.Button(button_frame, text="Cadastrar", command=add_new_row)
+add_btn.pack(side=tk.LEFT, padx=5, pady=5)
+
+edit_btn = tk.Button(button_frame, text="Editar", state=tk.DISABLED, command=editar_callback)
+edit_btn.pack(side=tk.LEFT, padx=5, pady=5)
+
+delete_btn = tk.Button(button_frame, text="Excluir", state=tk.DISABLED, command=excluir_callback)
+delete_btn.pack(side=tk.LEFT, padx=5, pady=5)
+
+# Função para ativar/desativar botões
+def on_tree_select(event):
+    if grid.tree.selection():
+        edit_btn.config(state=tk.NORMAL)
+        delete_btn.config(state=tk.NORMAL)
+    else:
+        edit_btn.config(state=tk.DISABLED)
+        delete_btn.config(state=tk.DISABLED)
+
+# Dados fornecidos
+columns = ['ID', 'Nome', 'CPF', 'Endereço', 'Login', 'Tipo']
 data = [
-    ('Admin', '00000000000', 'Endereço Admin', 'admin', 'administrador'),
-    ('User', '11111111111', 'Endereço User', 'user', 'comum'),
-    ('User 2', '22222222222', 'Endereço User 2', 'user2', 'comum'),
-    ('User 3', '33333333333', 'Endereço User 3', 'user3', 'comum'),
-    ('User 4', '44444444444', 'Endereço User 4', 'user4', 'comum'),
-    ('User 5', '55555555555', 'Endereço User 5', 'user5', 'comum'),
-    ('User 6', '66666666666', 'Endereço User 6', 'user6', 'comum'),
-    ('User 7', '77777777777', 'Endereço User 7', 'user7', 'comum'),
-    ('User 8', '88888888888', 'Endereço User 8', 'user8', 'comum'),
-    ('User 9', '99999999999', 'Endereço User 9', 'user9', 'comum'),
-    ('User 10', '10101010101', 'Endereço User 10', 'user10', 'comum'),
-    ('User 11', '11111111111', 'Endereço User 11', 'user11', 'comum'),
-    ('User 12', '12121212121', 'Endereço User 12', 'user12', 'comum'),
-    ('User 13', '13131313131', 'Endereço User 13', 'user13', 'comum'),
-    ('User 14', '14141414141', 'Endereço User 14', 'user14', 'comum'),
-    ('User 15', '15151515151', 'Endereço User 15', 'user15', 'comum'),
-    ('User 16', '16161616161', 'Endereço User 16', 'user16', 'comum'),
-    ('User 17', '17171717171', 'Endereço User 17', 'user17', 'comum'),
-    ('User 18', '18181818181', 'Endereço User 18', 'user18', 'comum')
+    [1, 'Admin', '00000000000', 'Endereço Admin', 'admin', 'administrador'],
+    [2, 'User', '11111111111', 'Endereço User', 'user', 'comum'],
+    [3, 'User 2', '22222222222', 'Endereço User 2', 'user2', 'comum'],
+    [4, 'User 3', '33333333333', 'Endereço User 3', 'user3', 'comum'],
+    [5, 'User 4', '44444444444', 'Endereço User 4', 'user4', 'comum'],
+    [6, 'User 5', '55555555555', 'Endereço User 5', 'user5', 'comum'],
+    [7, 'User 6', '66666666666', 'Endereço User 6', 'user6', 'comum'],
+    [8, 'User 7', '77777777777', 'Endereço User 7', 'user7', 'comum'],
+    [9, 'User 8', '88888888888', 'Endereço User 8', 'user8', 'comum'],
+    [10, 'User 9', '99999999999', 'Endereço User 9', 'user9', 'comum'],
+    [11, 'User 10', '10101010101', 'Endereço User 10', 'user10', 'comum'],
+    [12, 'User 11', '11111111111', 'Endereço User 11', 'user11', 'comum'],
+    [13, 'User 12', '12121212121', 'Endereço User 12', 'user12', 'comum'],
+    [14, 'User 13', '13131313131', 'Endereço User 13', 'user13', 'comum'],
+    [15, 'User 14', '14141414141', 'Endereço User 14', 'user14', 'comum'],
+    [16, 'User 15', '15151515151', 'Endereço User 15', 'user15', 'comum'],
+    [17, 'User 16', '16161616161', 'Endereço User 16', 'user16', 'comum'],
+    [18, 'User 17', '17171717171', 'Endereço User 17', 'user17', 'comum'],
+    [19, 'User 18', '18181818181', 'Endereço User 18', 'user18', 'comum']
 ]
 
-# Funções de callback para os botões Editar e Excluir
-def editar_callback(row):
-    print(f"Editar linha {row}")
+# Criar a grid
+grid = Grid(root, columns, data)
 
-def excluir_callback(row):
-    print(f"Remover linha {row}")
-    if 0 <= row - 1 < len(data):
-        data.pop(row - 1)
-        grid.update_grid()
+grid.tree.bind('<<TreeviewSelect>>', on_tree_select)
 
-# Cria a janela principal
-root = tk.Tk()
-root.geometry("800x600")
-grid = Grid(root, columns, data, editar_callback, excluir_callback)
 root.mainloop()

@@ -60,9 +60,11 @@ class RealizacaoVendas(tk.Frame):
         self.frame_adicionar_produto = tk.Frame(self.frame_venda)
         self.frame_adicionar_produto.pack(pady=5)
 
-        self.entry_quantidade = tk.Entry(self.frame_adicionar_produto, width=5, state=tk.DISABLED)
-        self.entry_quantidade.insert(0, "1")
+        # inicia a quantidade como 1
+        self.entry_quantidade = tk.Entry(self.frame_adicionar_produto, width=5, state=tk.NORMAL)
+        self.entry_quantidade.insert(0, 1)
         self.entry_quantidade.pack(side=tk.LEFT, padx=5)
+        self.entry_quantidade.config(state=tk.DISABLED)
 
         self.btn_adicionar_produto = tk.Button(self.frame_adicionar_produto, text="Adicionar Produto", command=self.adicionar_produto, state=tk.DISABLED)
         self.btn_adicionar_produto.pack(side=tk.LEFT, padx=5)
@@ -70,10 +72,6 @@ class RealizacaoVendas(tk.Frame):
         # Frame para exibir os produto selecionados com altura fixa e com scrollbar
         self.frame_gred_view = tk.Frame(self.frame_venda)
         self.frame_gred_view.pack(pady=5, fill=tk.X, expand=True)
-        # adiciona um scrollbar ao frame_gred_view
-        scrollbar = tk.Scrollbar(self.frame_gred_view)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
 
         # Mostrar quantidade de produtos e valor total ao final da tabela
         self.total_frame = tk.Frame(self.frame_venda)
@@ -88,7 +86,7 @@ class RealizacaoVendas(tk.Frame):
     def addFrameBuscar(self, frame, texto, state, callback):
         label = tk.Label(frame, text=texto, font=("Arial", 14))
         label.pack(side=tk.LEFT, padx=5)
-        entry = tk.Entry(frame, state=state)
+        entry = tk.Entry(frame, state=state, width=50)  
         entry.pack(side=tk.LEFT, padx=5)
         entry.bind("<KeyRelease>", callback)
         return label, entry 

@@ -19,7 +19,8 @@ class Grid(tk.Frame):
         frame.pack(fill=tk.X, expand=True, padx=10, pady=10, anchor='n')
 
         for col in range(len(colunas)):
-            header = ttk.Label(frame, text=colunas[col], borderwidth=1, relief="solid")
+            # configurar as colunas com o nome das colunas em negrito
+            header = ttk.Label(frame, text=colunas[col], borderwidth=1, relief="solid", font=("Arial", 10, "bold"))
             header.grid(row=0, column=col, sticky="nsew")
             self.grid_widgets.append(header)
 
@@ -27,9 +28,11 @@ class Grid(tk.Frame):
             for col in range(len(colunas)):
                 if col == len(colunas) - 1:
                     action_frame = ttk.Frame(frame)
-                    edit_button = ttk.Button(action_frame, text="Editar", command=lambda r=row: self.editar_callback(dados[row-1]))
+                    if not self.condicao_especial:
+                        edit_button = ttk.Button(action_frame, text="Editar", command=lambda r=row: self.editar_callback(dados[row-1]))
+                        edit_button.pack(side=tk.LEFT)
+                    
                     delete_button = ttk.Button(action_frame, text="Excluir", command=lambda r=row: self.excluir_callback(dados[row-1]))
-                    edit_button.pack(side=tk.LEFT)
                     delete_button.pack(side=tk.LEFT)
                     action_frame.grid(row=row, column=col, sticky="nsew")
                     self.grid_widgets.append(action_frame)
@@ -54,9 +57,11 @@ class Grid(tk.Frame):
         for col in range(len(self.colunas)):
             if col == len(self.colunas) - 1:
                 action_frame = ttk.Frame(frame)
-                edit_button = ttk.Button(action_frame, text="Editar", command=lambda r=row: self.editar_callback(dados))
+                if not self.condicao_especial:
+                    edit_button = ttk.Button(action_frame, text="Editar", command=lambda r=row: self.editar_callback(dados))
+                    edit_button.pack(side=tk.LEFT)
+
                 delete_button = ttk.Button(action_frame, text="Excluir", command=lambda r=row: self.excluir_callback(dados))
-                edit_button.pack(side=tk.LEFT)
                 delete_button.pack(side=tk.LEFT)
                 action_frame.grid(row=row, column=col, sticky="nsew")
                 self.grid_widgets.append(action_frame)

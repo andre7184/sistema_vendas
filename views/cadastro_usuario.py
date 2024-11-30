@@ -1,5 +1,6 @@
 import tkinter as tk
 from components.formulario_cadastro import FormularioCadastro
+from components.itens import criar_titulo
 
 class CadastroUsuario(tk.Frame):
     def __init__(self, master, usuario_controller, usuario=None):
@@ -12,11 +13,12 @@ class CadastroUsuario(tk.Frame):
             "Senha": {"tipo": "password"},
             "Tipo": {"tipo": "select", "options": ["Administrador", "Vendedor"]}
         }
-        
+        self.titulo = criar_titulo(self, "Cadastrar Usuário", "CadastroUsuario", fonte=("Arial", 16))
         self.formulario = FormularioCadastro(self, campos, self.salvar_usuario)
         
         if usuario:
             self.preencher_dados(usuario)
+            self.titulo.config(text="Editar Usuário")
 
     def preencher_dados(self, usuario):
         self.formulario.set_dados({

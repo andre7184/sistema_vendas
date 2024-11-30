@@ -40,8 +40,6 @@ class ClienteController:
         return next((cliente for cliente in self.clientes if cliente.id == id), None)
 
     def buscar_cliente_por_nome(self, nome):
-        print("Buscando cliente por nome...")
-        print(f"Nome: {nome}")
         # Descomente as linhas abaixo para usar o banco de dados
         # condicao = "nome LIKE %s"
         # valores = (f"%{nome}%",)
@@ -50,6 +48,7 @@ class ClienteController:
         return [cliente for cliente in self.clientes if nome.lower() in cliente.nome.lower()]
 
     def atualizar_cliente(self, id, nome, cpf, endereco):
+        print(id, nome, cpf, endereco)
         # Descomente as linhas abaixo para usar o banco de dados
         # valores = (nome, cpf, endereco)
         # self.crud.atualizar(self.tabela, self.colunas[1:], valores, "id", id)  # Exclui o 'id'

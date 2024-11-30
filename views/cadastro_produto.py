@@ -1,5 +1,6 @@
 import tkinter as tk
 from components.formulario_cadastro import FormularioCadastro
+from components.itens import criar_titulo
 
 class CadastroProduto(tk.Frame):
     def __init__(self, master, produto_controller, produto=None):
@@ -12,12 +13,13 @@ class CadastroProduto(tk.Frame):
             "Quantidade": {"tipo": "integer"},
             "Valor": {"tipo": "real"}
         }
-        
+        self.titulo = criar_titulo(self, "Cadastrar Produto", "CadastroProduto", fonte=("Arial", 16))
         self.formulario = FormularioCadastro(self, campos, self.salvar_produto)
         
         
         if produto:
             self.preencher_dados(produto)
+            self.titulo.config(text="Editar Produto")
 
     def preencher_dados(self, produto):
         self.formulario.set_dados({

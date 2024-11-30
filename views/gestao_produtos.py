@@ -1,5 +1,7 @@
 import tkinter as tk
+from components.cores import obter_cor
 from components.grid import Grid
+from components.itens import criar_botao, criar_frame, criar_mensagem, criar_titulo
 from views.cadastro_produto import CadastroProduto
 
 class GestaoProdutos(tk.Frame):
@@ -13,29 +15,19 @@ class GestaoProdutos(tk.Frame):
         colunas = ["ID", "Nome", "Descrição", "Quantidade", "Valor"]
         self.dados = [(produto.id, produto.nome, produto.descricao, produto.quantidade, produto.valor) for produto in produto_controller.listar_produtos()]
 
-        self.mensagem_titulo = tk.Label(self, text="Gerenciamento de Produtos", fg="blue", font=("Arial", 16))
-        self.mensagem_titulo.pack(pady=10)
+        criar_titulo(self, "Gerenciamento de Produtos", "GestaoProdutos", fonte=("Arial", 16))
+        self.mensagem_label = criar_mensagem(self, "GestaoProdutos", "", tipo="sucesso")
+        
+        button_frame = criar_frame(self, "GestaoProdutos", lado=tk.TOP, preencher=tk.X, expandir=False)
+        criar_botao(button_frame, "Cadastrar Produto", self.cadastrar_produto, "GestaoProdutos", altura=1).pack(side=tk.LEFT, padx=5, pady=5)
+        self.btn_editar_usuario = criar_botao(button_frame, "Editar Produto", self.editar_produto_selecionado, "GestaoProdutos", altura=1)
+        self.btn_editar_usuario.pack(side=tk.LEFT, padx=5, pady=5)
+        self.btn_editar_usuario.config(state=tk.DISABLED)
+        self.btn_excluir_usuario = criar_botao(button_frame, "Excluir Produto", self.excluir_produto_selecionado, "GestaoProdutos", altura=1)
+        self.btn_excluir_usuario.pack(side=tk.LEFT, padx=5, pady=5)
+        self.btn_excluir_usuario.config(state=tk.DISABLED)
 
-        self.mensagem_label = tk.Label(self, text="", fg="red")
-        self.mensagem_label.pack(pady=5)
-
-        # Criar frame para os botões
-        button_frame = tk.Frame(self)
-        button_frame.pack(fill=tk.X)
-
-        self.btn_cadastrar_produto = tk.Button(button_frame, text="Cadastrar Produto", command=self.cadastrar_produto)
-        self.btn_cadastrar_produto.pack(side=tk.LEFT, padx=5, pady=5)
-
-        self.btn_editar_produto = tk.Button(button_frame, text="Editar Produto", state=tk.DISABLED, command=self.editar_produto_selecionado)
-        self.btn_editar_produto.pack(side=tk.LEFT, padx=5, pady=5)
-
-        self.btn_excluir_produto = tk.Button(button_frame, text="Excluir Produto", state=tk.DISABLED, command=self.excluir_produto_selecionado)
-        self.btn_excluir_produto.pack(side=tk.LEFT, padx=5, pady=5)
-
-        # Criar a grid
         self.lista_produtos = Grid(self, colunas, self.dados)
-
-        # Vincular evento de seleção na grid para ativar/desativar botões
         self.lista_produtos.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
 
     def cadastrar_produto(self):
@@ -69,16 +61,11 @@ class GestaoProdutos(tk.Frame):
             widget.pack_forget()
 
     def atualizar_lista(self):
-        print("Atualizando lista...")
         self.clear_frame()
         self.showGrid(self.produto_controller)
 
     def mostrar_mensagem(self, mensagem, tipo):
-        print(mensagem)
-        if tipo == "sucesso":
-            self.mensagem_label.config(text=mensagem, fg="green")
-        else:
-            self.mensagem_label.config(text=mensagem, fg="red")
+        self.mensagem_label.config(text=mensagem, fg=obter_cor("GestaoProdutos", tipo))
 
     def on_tree_select(self, event):
         if self.lista_produtos.tree.selection():

@@ -1,12 +1,11 @@
 from db.models import Relatorio
-from components.utils import obter_colunas
 # from db.crud import CRUD
 
 class RelatorioController:
     def __init__(self):
         # self.crud = CRUD()
         self.tabela = "relatorios"
-        self.colunas = obter_colunas(Relatorio)
+        self.colunas = ["id", "cliente", "produto", "quantidade", "vendedor", "forma_pagamento", "data_venda"]
 
     def gerar_relatorio(self):
         # Método para gerar relatórios fictícios para teste

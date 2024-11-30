@@ -1,4 +1,6 @@
 import tkinter as tk
+from components.itens import criar_texto, criar_input, criar_botao, criar_select, criar_mensagem
+from components.cores import obter_cor
 
 class FormularioCadastro(tk.Frame):
     def __init__(self, master, campos, salvar_callback):
@@ -10,37 +12,26 @@ class FormularioCadastro(tk.Frame):
 
     def create_widgets(self):
         self.entries = {}
-        self.mensagem_label = tk.Label(self, text="", fg="red")
-        self.mensagem_label.pack(pady=10)
+        self.variables = {}  # Dicionário para armazenar as variáveis dos OptionMenus
+        self.mensagem_label = criar_mensagem(self, "FormularioCadastro", texto="", tipo="erro")
+        
         for campo, config in self.campos.items():
-            label = tk.Label(self, text=campo)
-            label.pack(pady=5)
-            widget = self.create_widget(config)
-            widget.pack(pady=5, padx=10, fill=tk.X)
-            self.entries[campo] = widget
+            criar_texto(self, campo, "FormularioCadastro")
+            if config["tipo"] == "entry":
+                self.entries[campo] = criar_input(self, "FormularioCadastro")
+            elif config["tipo"] == "password":
+                self.entries[campo] = criar_input(self, "FormularioCadastro")
+                self.entries[campo].config(show="*")
+            elif config["tipo"] == "select":
+                self.entries[campo], self.variables[campo] = criar_select(self, config["options"], "FormularioCadastro")
+            elif config["tipo"] == "integer":
+                self.entries[campo] = criar_input(self, "FormularioCadastro")
+                self.entries[campo].config(validate="key", validatecommand=(self.register(self.validate_inteiro), '%P'))
+            elif config["tipo"] == "real":
+                self.entries[campo] = criar_input(self, "FormularioCadastro")
+                self.entries[campo].bind("<FocusOut>", self.formatar_real)
 
-        self.button_salvar = tk.Button(self, text="Salvar", command=self.salvar_dados, width=20, height=2)
-        self.button_salvar.pack(pady=10)
-
-    def create_widget(self, config):
-        tipo = config.get('tipo', 'entry')
-        if tipo == 'entry':
-            return tk.Entry(self, width=40)
-        elif tipo == 'password':
-            return tk.Entry(self, show='*', width=40)
-        elif tipo == 'select':
-            options = config.get('options', [])
-            variable = tk.StringVar(self)
-            variable.set(options[0] if options else '')
-            option_menu = tk.OptionMenu(self, variable, *options)
-            option_menu.config(width=37)
-            option_menu.variable = variable
-            return option_menu
-        elif tipo == 'integer':
-            return tk.Entry(self, validate="key", validatecommand=(self.register(self.validate_inteiro), '%P'), width=40)
-        elif tipo == 'real':
-            return tk.Entry(self, width=40)
-        return tk.Entry(self)
+        criar_botao(self, "Salvar", self.salvar_dados, "FormularioCadastro", altura=2, lado=tk.TOP)
 
     def validate_inteiro(self, value_if_allowed):
         if value_if_allowed.isdigit() or value_if_allowed == "":
@@ -66,7 +57,7 @@ class FormularioCadastro(tk.Frame):
             if isinstance(widget, tk.Entry):
                 dados[campo] = widget.get()
             elif isinstance(widget, tk.OptionMenu):
-                dados[campo] = widget.variable.get()
+                dados[campo] = self.variables[campo].get()
         self.salvar_callback(dados)
 
     def set_dados(self, dados):
@@ -76,10 +67,7 @@ class FormularioCadastro(tk.Frame):
                 widget.delete(0, tk.END)
                 widget.insert(0, valor)
             elif isinstance(widget, tk.OptionMenu):
-                widget.variable.set(valor)
+                self.variables[campo].set(valor)
 
     def mostrar_mensagem(self, mensagem, tipo):
-        if tipo == "sucesso":
-            self.mensagem_label.config(text=mensagem, fg="green")
-        else:
-            self.mensagem_label.config(text=mensagem, fg="red")
+        self.mensagem_label.config(text=mensagem, fg=obter_cor("FormularioCadastro", tipo))

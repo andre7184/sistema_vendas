@@ -1,4 +1,5 @@
 import tkinter as tk
+from components.itens import criar_titulo, criar_texto, criar_input, criar_botao, criar_frame, criar_mensagem
 
 class Login(tk.Frame):
     def __init__(self, master, usuario_controller, on_login_success):
@@ -10,30 +11,23 @@ class Login(tk.Frame):
         self.bind_events()
 
     def create_widgets(self):
-        self.container = tk.Frame(self, bd=2, relief=tk.RAISED, bg="#D3D3D3")  # Adiciona uma borda cinza ao redor do menu
+        self.container = criar_frame(self, "Login", lado=tk.TOP, preencher=tk.BOTH, expandir=True)
+        self.container.config(bd=2, relief=tk.RAISED)  # Adiciona uma borda cinza ao redor do menu
         self.container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-
-        self.inner_frame = tk.Frame(self.container, padx=20, pady=20)  # Adiciona padding interno
-        self.inner_frame.pack(fill=tk.BOTH, expand=True)
-
-        self.label_titulo = tk.Label(self.inner_frame, text="Entre no Sistema", fg="blue", font=("Arial", 16))
-        self.label_titulo.pack()
-
-        self.label_login = tk.Label(self.inner_frame, text="Usuário")
-        self.label_login.pack(pady=5)
-        self.entry_login = tk.Entry(self.inner_frame)
-        self.entry_login.pack(pady=5)
-
-        self.label_senha = tk.Label(self.inner_frame, text="Senha")
-        self.label_senha.pack(pady=5)
-        self.entry_senha = tk.Entry(self.inner_frame, show="*")
-        self.entry_senha.pack(pady=5)
-
-        self.button_login = tk.Button(self.inner_frame, text="Entrar", command=self.fazer_login)
-        self.button_login.pack(pady=10)
-
-        self.label_erro = tk.Label(self.inner_frame, text="", fg="red")
-        self.label_erro.pack(pady=5)
+        
+        self.inner_frame = criar_frame(self.container, "Login", lado=tk.TOP, preencher=tk.BOTH, expandir=True)
+        self.inner_frame.config(padx=20, pady=20)  # Adiciona padding interno
+        
+        criar_titulo(self.inner_frame, "Entre no Sistema", "Login", fonte=("Arial", 16))
+        criar_texto(self.inner_frame, "Usuário", "Login")
+        self.entry_login = criar_input(self.inner_frame, "Login")
+        
+        criar_texto(self.inner_frame, "Senha", "Login")
+        self.entry_senha = criar_input(self.inner_frame, "Login", estado=tk.NORMAL)
+        self.entry_senha.config(show="*")
+        
+        self.button_login = criar_botao(self.inner_frame, "Entrar", self.fazer_login, "Login", lado=tk.TOP, padx=5, pady=5)
+        self.label_erro = criar_mensagem(self.inner_frame, "", "", tipo="erro")
 
     def bind_events(self):
         self.entry_login.bind("<Return>", self.on_enter)
@@ -51,7 +45,6 @@ class Login(tk.Frame):
         login = self.entry_login.get()
         senha = self.entry_senha.get()
         usuario = self.usuario_controller.autenticar_usuario(login, senha)
-        print(usuario)
         if usuario:
             self.on_login_success(usuario)
         else:

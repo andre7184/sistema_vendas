@@ -12,6 +12,8 @@ from controllers.produto_controller import ProdutoController
 from controllers.venda_controller import VendaController
 from controllers.relatorio_controller import RelatorioController
 from controllers.cliente_controller import ClienteController  # Nova importação
+from components.itens import criar_titulo, criar_texto, criar_frame
+from components.cores import obter_cor
 
 class App(tk.Tk):
     def __init__(self):
@@ -39,7 +41,7 @@ class App(tk.Tk):
     def show_main_menu(self):
         self.clear_frame()
         self.menu = tk.Menu(self)
-        self.config(menu=self.menu, bg="lightblue")
+        self.config(menu=self.menu, bg=obter_cor("MainApp", "fundo"))
 
         self.menu_usuarios = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Usuários", menu=self.menu_usuarios)
@@ -63,8 +65,7 @@ class App(tk.Tk):
 
         self.menu.add_command(label="Sair", command=self.sair)
 
-        welcome_label = tk.Label(self, text=f"Bem-vindo, {self.current_user.nome}!")
-        welcome_label.pack()
+        criar_titulo(self, f"Bem-vindo, {self.current_user.nome}!", "MainApp", fonte=("Arial", 18))
 
     def sair(self):
         self.current_user = None

@@ -14,19 +14,12 @@ class GestaoProdutos(tk.Frame):
         self.pack(fill=tk.BOTH, expand=True)
         colunas = ["ID", "Nome", "Descrição", "Quantidade", "Valor"]
         self.dados = [(produto.id, produto.nome, produto.descricao, produto.quantidade, produto.valor) for produto in produto_controller.listar_produtos()]
-
-        criar_titulo(self, "Gerenciamento de Produtos", "GestaoProdutos", fonte=("Arial", 16))
+        self.titulo = criar_titulo(self, "Gerenciamento de Produtos", "GestaoProdutos", fonte=("Arial", 16), pady=5)
         self.mensagem_label = criar_mensagem(self, "GestaoProdutos", "", tipo="sucesso")
-        
-        button_frame = criar_frame(self, "GestaoProdutos", lado=tk.TOP, preencher=tk.X, expandir=False)
-        criar_botao(button_frame, "Cadastrar Produto", self.cadastrar_produto, "GestaoProdutos", altura=1).pack(side=tk.LEFT, padx=5, pady=5)
-        self.btn_editar_usuario = criar_botao(button_frame, "Editar Produto", self.editar_produto_selecionado, "GestaoProdutos", altura=1)
-        self.btn_editar_usuario.pack(side=tk.LEFT, padx=5, pady=5)
-        self.btn_editar_usuario.config(state=tk.DISABLED)
-        self.btn_excluir_usuario = criar_botao(button_frame, "Excluir Produto", self.excluir_produto_selecionado, "GestaoProdutos", altura=1)
-        self.btn_excluir_usuario.pack(side=tk.LEFT, padx=5, pady=5)
-        self.btn_excluir_usuario.config(state=tk.DISABLED)
-
+        self.button_frame = criar_frame(self, "GestaoProdutos", lado=tk.TOP)
+        self.btn_cadastrar_produto = criar_botao(self.button_frame, "Cadastrar Produto", self.cadastrar_produto, "GestaoProdutos", altura=1, lado=tk.LEFT, padx=5, pady=5)
+        self.btn_editar_produto = criar_botao(self.button_frame, "Editar Produto", self.editar_produto_selecionado, "GestaoProdutos", altura=1, lado=tk.LEFT, padx=5, pady=5, estado=tk.DISABLED)
+        self.btn_excluir_produto = criar_botao(self.button_frame, "Excluir Produto", self.excluir_produto_selecionado, "GestaoProdutos", altura=1, lado=tk.LEFT, padx=5, pady=5, estado=tk.DISABLED)
         self.lista_produtos = Grid(self, colunas, self.dados)
         self.lista_produtos.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
 

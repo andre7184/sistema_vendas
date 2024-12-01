@@ -6,11 +6,14 @@ CORES_PADRAO = {
     "texto": "black",
     "erro": "red",
     "sucesso": "green",
-    "fundo": "lightblue"
+    "fundo": ""
 }
 
 # Configurações de cores específicas para componentes
 CORES_COMPONENTES = {
+    "MainApp": {
+        "fundo": "#ADD8E6" # o nome da cor azul claro #ADD8E6
+    },
     "Login": {
         "fundo": "#f0f0f0"
     },
@@ -20,6 +23,6 @@ CORES_COMPONENTES = {
 def obter_cor(componente, tipo):
     """
     Retorna a cor para um tipo específico de um componente.
-    Se a cor específica não estiver definida, retorna a cor padrão.
+    Se a cor específica não estiver definida, retorna None.
     """
-    return CORES_COMPONENTES.get(componente, {}).get(tipo, CORES_PADRAO[tipo])
+    return CORES_COMPONENTES.get(componente, {}).get(tipo, CORES_PADRAO.get(tipo, None))

@@ -13,7 +13,7 @@ class CadastroCliente(tk.Frame):
             "CPF": {"tipo": "entry"},
             "Endereço": {"tipo": "entry"}
         }
-        self.titulo = criar_titulo(self, "Cadastrar Cliente", "CadastroCliente", fonte=("Arial", 16))
+        self.titulo = criar_titulo(self, "Cadastrar Cliente", "CadastroCliente", fonte=("Arial", 16), pady=5)
         self.formulario = FormularioCadastro(self, campos, self.salvar_cliente)
         
         if cliente:

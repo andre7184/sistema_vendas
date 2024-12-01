@@ -19,11 +19,11 @@ class Login(tk.Frame):
         self.inner_frame.config(padx=20, pady=20)  # Adiciona padding interno
         
         criar_titulo(self.inner_frame, "Entre no Sistema", "Login", fonte=("Arial", 16))
-        criar_texto(self.inner_frame, "Usuário", "Login")
-        self.entry_login = criar_input(self.inner_frame, "Login")
+        criar_texto(self.inner_frame, "Usuário", "Login", lado=tk.TOP)
+        self.entry_login = criar_input(self.inner_frame, "Login", lado=tk.TOP)
         
-        criar_texto(self.inner_frame, "Senha", "Login")
-        self.entry_senha = criar_input(self.inner_frame, "Login", estado=tk.NORMAL)
+        criar_texto(self.inner_frame, "Senha", "Login", lado=tk.TOP)
+        self.entry_senha = criar_input(self.inner_frame, "Login", estado=tk.NORMAL, lado=tk.TOP)
         self.entry_senha.config(show="*")
         
         self.button_login = criar_botao(self.inner_frame, "Entrar", self.fazer_login, "Login", lado=tk.TOP, padx=5, pady=5)

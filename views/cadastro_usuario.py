@@ -13,7 +13,7 @@ class CadastroUsuario(tk.Frame):
             "Senha": {"tipo": "password"},
             "Tipo": {"tipo": "select", "options": ["Administrador", "Vendedor"]}
         }
-        self.titulo = criar_titulo(self, "Cadastrar Usuário", "CadastroUsuario", fonte=("Arial", 16))
+        self.titulo = criar_titulo(self, "Cadastrar Usuário", "CadastroUsuario", fonte=("Arial", 16), pady=5)
         self.formulario = FormularioCadastro(self, campos, self.salvar_usuario)
         
         if usuario:

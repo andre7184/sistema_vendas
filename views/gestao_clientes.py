@@ -1,5 +1,7 @@
 import tkinter as tk
+from components.cores import obter_cor
 from components.grid import Grid
+from components.itens import criar_botao, criar_frame, criar_mensagem, criar_titulo
 from views.cadastro_cliente import CadastroCliente
 
 class GestaoClientes(tk.Frame):
@@ -12,30 +14,13 @@ class GestaoClientes(tk.Frame):
         self.pack(fill=tk.BOTH, expand=True)
         colunas = ["ID", "Nome", "CPF", "Endereço"]
         self.dados = [(cliente.id, cliente.nome, cliente.cpf, cliente.endereco) for cliente in cliente_controller.listar_clientes()]
-
-        self.mensagem_titulo = tk.Label(self, text="Gerenciamento de Clientes", fg="blue", font=("Arial", 16))
-        self.mensagem_titulo.pack()
-
-        self.mensagem_label = tk.Label(self, text="", fg="red")
-        self.mensagem_label.pack()
-
-        # Criar frame para os botões
-        button_frame = tk.Frame(self)
-        button_frame.pack(fill=tk.X)
-
-        self.btn_cadastrar_cliente = tk.Button(button_frame, text="Cadastrar Cliente", command=self.cadastrar_cliente)
-        self.btn_cadastrar_cliente.pack(side=tk.LEFT, padx=5, pady=5)
-
-        self.btn_editar_cliente = tk.Button(button_frame, text="Editar Cliente", state=tk.DISABLED, command=self.editar_cliente_selecionado)
-        self.btn_editar_cliente.pack(side=tk.LEFT, padx=5, pady=5)
-
-        self.btn_excluir_cliente = tk.Button(button_frame, text="Excluir Cliente", state=tk.DISABLED, command=self.excluir_cliente_selecionado)
-        self.btn_excluir_cliente.pack(side=tk.LEFT, padx=5, pady=5)
-
-        # Criar a grid
+        self.titulo = criar_titulo(self, "Gerenciamento de Cliente", "GestaoClientes", fonte=("Arial", 16), pady=5)
+        self.mensagem_label = criar_mensagem(self, "GestaoClientes", "", tipo="sucesso")
+        self.button_frame = criar_frame(self, "GestaoClientes", lado=tk.TOP)
+        self.btn_cadastrar_cliente = criar_botao(self.button_frame, "Cadastrar Cliente", self.cadastrar_cliente, "GestaoClientes", altura=1, lado=tk.LEFT, padx=5, pady=5)
+        self.btn_editar_cliente = criar_botao(self.button_frame, "Editar Cliente", self.editar_cliente_selecionado, "GestaoClientes", altura=1, lado=tk.LEFT, padx=5, pady=5, estado=tk.DISABLED)
+        self.btn_excluir_cliente = criar_botao(self.button_frame, "Excluir Cliente", self.excluir_cliente_selecionado, "GestaoClientes", altura=1, lado=tk.LEFT, padx=5, pady=5, estado=tk.DISABLED)
         self.lista_clientes = Grid(self, colunas, self.dados)
-
-        # Vincular evento de seleção na grid para ativar/desativar botões
         self.lista_clientes.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
 
     def cadastrar_cliente(self):
@@ -73,10 +58,7 @@ class GestaoClientes(tk.Frame):
         self.showGrid(self.cliente_controller)
 
     def mostrar_mensagem(self, mensagem, tipo):
-        if tipo == "sucesso":
-            self.mensagem_label.config(text=mensagem, fg="green")
-        else:
-            self.mensagem_label.config(text=mensagem, fg="red")
+        self.mensagem_label.config(text=mensagem, fg=obter_cor("GestaoUsuarios", tipo))
 
     def on_tree_select(self, event):
         if self.lista_clientes.tree.selection():

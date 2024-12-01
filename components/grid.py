@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from components.itens import adjust_column_width, criar_frame
+
 class Grid(tk.Frame):
     def __init__(self, master, colunas, dados, height=None):
         super().__init__(master)
@@ -10,8 +12,8 @@ class Grid(tk.Frame):
         self.create_widgets(colunas, dados)
 
     def create_widgets(self, colunas, dados):
-        frame = ttk.Frame(self)
-        frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        frame = criar_frame(self, Grid, padding=5, preencher=tk.BOTH, expandir=True)#ttk.Frame(self)
+        #frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         self.tree = ttk.Treeview(frame, columns=colunas, show='headings', height=self.height)
         for col in colunas:
@@ -34,6 +36,8 @@ class Grid(tk.Frame):
 
         frame.grid_rowconfigure(0, weight=1)
         frame.grid_columnconfigure(0, weight=1)
+
+        adjust_column_width(self.tree)
 
     def add_row(self, dados):
         self.tree.insert('', tk.END, values=dados)

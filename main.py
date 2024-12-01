@@ -12,7 +12,7 @@ from controllers.produto_controller import ProdutoController
 from controllers.venda_controller import VendaController
 from controllers.relatorio_controller import RelatorioController
 from controllers.cliente_controller import ClienteController  # Nova importação
-from components.itens import criar_titulo, criar_texto, criar_frame
+from components.itens import criar_frame_com_scroll, criar_titulo, criar_texto, criar_frame
 from components.cores import obter_cor
 
 class App(tk.Tk):
@@ -20,6 +20,7 @@ class App(tk.Tk):
         super().__init__()
         self.title("Sistema de Vendas")
         self.geometry("800x600")
+        self.pack_propagate(False)
         self.usuario_controller = UsuarioController()
         self.produto_controller = ProdutoController()
         self.venda_controller = VendaController()
@@ -84,7 +85,8 @@ class App(tk.Tk):
 
     def show_realizacao_vendas(self):
         self.clear_frame()
-        self.realizacao_vendas_frame = RealizacaoVendas(self, self.venda_controller, self.produto_controller, self.cliente_controller)
+        main_frame, second_frame = criar_frame_com_scroll(self)
+        self.realizacao_vendas_frame = RealizacaoVendas(self, second_frame, self.venda_controller, self.produto_controller, self.cliente_controller)
         self.realizacao_vendas_frame.pack()
 
     def show_relatorio_vendas(self):

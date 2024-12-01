@@ -14,18 +14,12 @@ class GestaoUsuarios(tk.Frame):
         self.pack(fill=tk.BOTH, expand=True)
         colunas = ["ID", "Nome", "Login", "Tipo"]
         self.dados = [(usuario.id, usuario.nome, usuario.login, usuario.tipo) for usuario in usuario_controller.listar_usuarios()]
-        criar_titulo(self, "Gerenciamento de Usuários", "GestaoUsuarios", fonte=("Arial", 16))
+        self.titulo = criar_titulo(self, "Gerenciamento de Usuários", "GestaoUsuarios", fonte=("Arial", 16), pady=5)
         self.mensagem_label = criar_mensagem(self, "GestaoUsuarios", "", tipo="sucesso")
-        
-        button_frame = criar_frame(self, "GestaoUsuarios", lado=tk.TOP, preencher=tk.X, expandir=False)
-        criar_botao(button_frame, "Cadastrar Usuário", self.cadastrar_usuario, "GestaoUsuarios", altura=1).pack(side=tk.LEFT, padx=5, pady=5)
-        self.btn_editar_usuario = criar_botao(button_frame, "Editar Usuário", self.editar_usuario_selecionado, "GestaoUsuarios", altura=1)
-        self.btn_editar_usuario.pack(side=tk.LEFT, padx=5, pady=5)
-        self.btn_editar_usuario.config(state=tk.DISABLED)
-        self.btn_excluir_usuario = criar_botao(button_frame, "Excluir Usuário", self.excluir_usuario_selecionado, "GestaoUsuarios", altura=1)
-        self.btn_excluir_usuario.pack(side=tk.LEFT, padx=5, pady=5)
-        self.btn_excluir_usuario.config(state=tk.DISABLED)
-        
+        self.button_frame = criar_frame(self, "GestaoUsuarios", lado=tk.TOP)
+        self.btn_cadastrar_usuario = criar_botao(self.button_frame, "Cadastrar Usuário", self.cadastrar_usuario, "GestaoUsuarios", altura=1, lado=tk.LEFT, padx=5, pady=5)
+        self.btn_editar_usuario = criar_botao(self.button_frame, "Editar Usuário", self.editar_usuario_selecionado, "GestaoUsuarios", altura=1, lado=tk.LEFT, padx=5, pady=5, estado=tk.DISABLED)
+        self.btn_excluir_usuario = criar_botao(self.button_frame, "Excluir Usuário", self.excluir_usuario_selecionado, "GestaoUsuarios", altura=1, lado=tk.LEFT, padx=5, pady=5, estado=tk.DISABLED)
         self.lista_usuarios = Grid(self, colunas, self.dados)
         self.lista_usuarios.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
 

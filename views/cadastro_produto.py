@@ -13,7 +13,7 @@ class CadastroProduto(tk.Frame):
             "Quantidade": {"tipo": "integer"},
             "Valor": {"tipo": "real"}
         }
-        self.titulo = criar_titulo(self, "Cadastrar Produto", "CadastroProduto", fonte=("Arial", 16))
+        self.titulo = criar_titulo(self, "Cadastrar Produto", "CadastroProduto", fonte=("Arial", 16), pady=5)
         self.formulario = FormularioCadastro(self, campos, self.salvar_produto)
         
         

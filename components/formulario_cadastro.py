@@ -16,19 +16,19 @@ class FormularioCadastro(tk.Frame):
         self.mensagem_label = criar_mensagem(self, "FormularioCadastro", texto="", tipo="erro")
         
         for campo, config in self.campos.items():
-            criar_texto(self, campo, "FormularioCadastro")
+            criar_texto(self, campo, "FormularioCadastro", lado=tk.TOP)
             if config["tipo"] == "entry":
-                self.entries[campo] = criar_input(self, "FormularioCadastro")
+                self.entries[campo] = criar_input(self, "FormularioCadastro", lado=tk.TOP)
             elif config["tipo"] == "password":
-                self.entries[campo] = criar_input(self, "FormularioCadastro")
+                self.entries[campo] = criar_input(self, "FormularioCadastro", lado=tk.TOP)
                 self.entries[campo].config(show="*")
             elif config["tipo"] == "select":
-                self.entries[campo], self.variables[campo] = criar_select(self, config["options"], "FormularioCadastro")
+                self.entries[campo], self.variables[campo] = criar_select(self, config["options"], "FormularioCadastro", lado=tk.TOP)
             elif config["tipo"] == "integer":
-                self.entries[campo] = criar_input(self, "FormularioCadastro")
+                self.entries[campo] = criar_input(self, "FormularioCadastro", lado=tk.TOP)
                 self.entries[campo].config(validate="key", validatecommand=(self.register(self.validate_inteiro), '%P'))
             elif config["tipo"] == "real":
-                self.entries[campo] = criar_input(self, "FormularioCadastro")
+                self.entries[campo] = criar_input(self, "FormularioCadastro", lado=tk.TOP)
                 self.entries[campo].bind("<FocusOut>", self.formatar_real)
 
         criar_botao(self, "Salvar", self.salvar_dados, "FormularioCadastro", altura=2, lado=tk.TOP)

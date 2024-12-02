@@ -22,10 +22,10 @@ class CadastroUsuario(tk.Frame):
 
     def preencher_dados(self, usuario):
         self.formulario.set_dados({
-            "Nome": usuario.nome,
-            "Login": usuario.login,
-            "Senha": usuario.senha,
-            "Tipo": usuario.tipo
+            "Nome": usuario.get_nome(),
+            "Login": usuario.get_login(),
+            "Senha": usuario.get_senha(),
+            "Tipo": usuario.get_tipo()
         })
 
     def salvar_usuario(self, dados):
@@ -36,7 +36,7 @@ class CadastroUsuario(tk.Frame):
         
         try:
             if self.usuario:
-                self.usuario_controller.atualizar_usuario(self.usuario.id, nome, login, senha, tipo)
+                self.usuario_controller.atualizar_usuario(self.usuario.get_id(), nome, login, senha, tipo)
                 mensagem = "Usuário atualizado com sucesso!"
             else:
                 self.usuario_controller.cadastrar_usuario(nome, login, senha, tipo)

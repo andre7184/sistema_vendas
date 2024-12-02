@@ -1,0 +1,3 @@
+Id,Cliente,Produto,Quantidade,Vendedor,Forma de Pagamento,Data
+1,Cliente A,Admin,"1, 2",400.0,2023-01-01
+2,Cliente B,Vendedor,2,600.0,2023-01-02

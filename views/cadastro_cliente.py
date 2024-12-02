@@ -22,9 +22,9 @@ class CadastroCliente(tk.Frame):
 
     def preencher_dados(self, cliente):
         self.formulario.set_dados({
-            "Nome": cliente.nome,
-            "CPF": cliente.cpf,
-            "Endereço": cliente.endereco
+            "Nome": cliente.get_nome(),
+            "CPF": cliente.get_cpf(),
+            "Endereço": cliente.get_endereco()
         })
 
     def salvar_cliente(self, dados):
@@ -34,13 +34,13 @@ class CadastroCliente(tk.Frame):
         
         try:
             if self.cliente:
-                self.cliente_controller.atualizar_cliente(self.cliente.id, nome, cpf, endereco)
+                self.cliente_controller.atualizar_cliente(self.cliente.get_id(), nome, cpf, endereco)
                 mensagem = "Cliente atualizado com sucesso!"
             else:
                 self.cliente_controller.cadastrar_cliente(nome, cpf, endereco)
                 mensagem = "Cliente cadastrado com sucesso!"
             if self.janela:
-                self.janela.atualizarClientesSelecionado({'id': self.cliente.id, 'nome': nome, 'cpf': cpf, 'endereco': endereco})
+                self.janela.atualizarClientesSelecionado({'id': self.cliente.get_id(), 'nome': nome, 'cpf': cpf, 'endereco': endereco})
                 self.destroy()
                 self.master.destroy()
             else:

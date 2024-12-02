@@ -57,3 +57,18 @@ class Grid(tk.Frame):
         # Inserir novos dados
         for row in dados:
             self.tree.insert('', tk.END, values=row)
+
+    def atualizar_dados(self, dados):
+        # Limpar os dados existentes na Treeview
+        for row in self.tree.get_children():
+            self.tree.delete(row)
+        # Inserir os novos dados
+        for item in dados:
+            self.tree.insert('', tk.END, values=item)
+
+    def obter_dados(self):
+        dados = []
+        for row_id in self.tree.get_children():
+            row = self.tree.item(row_id)['values']
+            dados.append(row)
+        return dados

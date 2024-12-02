@@ -1,5 +1,5 @@
-import datetime
 import tkinter as tk
+from datetime import datetime
 from tkinter import messagebox
 from components.grid import Grid
 from components.itens import criar_botao, criar_frame, criar_input, criar_radio, criar_texto, criar_titulo
@@ -10,8 +10,9 @@ import locale
 # Configura o locale para o formato de moeda brasileira
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 class RealizacaoVendas(tk.Frame):
-    def __init__(self, parent, master, venda_controller, produto_controller, cliente_controller):
+    def __init__(self, parent, master, venda_controller, cliente_controller, produto_controller):
         super().__init__(master)
+        self.parent = parent
         self.venda_controller = venda_controller
         self.produto_controller = produto_controller
         self.cliente_controller = cliente_controller
@@ -110,7 +111,7 @@ class RealizacaoVendas(tk.Frame):
         nome_cliente = self.entry_buscar_cliente.get()
         clientes = self.cliente_controller.buscar_cliente_por_nome(nome_cliente)
         if clientes:
-            dados_clientes = [(cliente.id, cliente.nome, cliente.cpf, cliente.endereco) for cliente in clientes]
+            dados_clientes = [(cliente.get_id(), cliente.get_nome(), cliente.get_cpf(), cliente.get_endereco()) for cliente in clientes]
             if not self.grid_clientes or not self.grid_clientes.winfo_ismapped():
                 self.grid_clientes = self.create_lista_clientes(self.frame_venda)
                 self.cliente_selecionado = {}
@@ -311,27 +312,6 @@ class RealizacaoVendas(tk.Frame):
             self.entry_parcelas.config(state=tk.NORMAL)
         else:
             self.entry_parcelas.config(state=tk.DISABLED)
-
-    def finalizar_venda(self):
-        if not self.produtos_adicionados:
-            messagebox.showerror("Erro", "Adicione produtos à venda antes de finalizar.")
-            return
-
-        forma_pagamento = self.forma_pagamento.get()
-        parcelas = self.parcelas.get() if forma_pagamento == "Parcelado" else 1
-
-        venda = {
-            "cliente": self.cliente_selecionado,
-            "produtos": self.produtos_adicionados,
-            "forma_pagamento": forma_pagamento,
-            "parcelas": parcelas,
-            "total": self.calcular_total()
-        }
-
-        self.venda_controller.registrar_venda(venda)
-        messagebox.showinfo("Sucesso", "Venda realizada com sucesso!")
-        self.limpar_venda()
-
 
     def calcular_total(self):
         total_valor = 0

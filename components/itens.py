@@ -31,9 +31,12 @@ def criar_botao(master, texto, comando, componente, estado=tk.NORMAL, largura=20
     button.pack(side=lado, padx=padx, pady=pady)
     return button
 
-def criar_select(master, opcoes, componente, largura=37, estado=None, lado=None, padx=None, pady=None):
-    variable = tk.StringVar(master)
-    variable.set(opcoes[0] if opcoes else '')
+def criar_select(master, opcoes, variable, largura=5, estado=None, lado=None, padx=None, pady=None):
+    if not variable:
+        variable = tk.StringVar(master)
+    if not opcoes:
+        opcoes = [""]  # Adiciona uma opção vazia se a lista estiver vazia
+    variable.set(opcoes[0])  # Define o valor inicial
     option_menu = tk.OptionMenu(master, variable, *opcoes)
     option_menu.config(width=largura)
     option_menu.pack(pady=pady, padx=padx, side=lado, fill=tk.X)

@@ -37,7 +37,7 @@ class ClienteController:
         # cliente = self.crud.buscar_por_id(self.tabela, self.colunas, "id", id)
         # if cliente:
         #     return Cliente(*cliente)
-        return next((cliente for cliente in self.clientes if cliente.id == id), None)
+        return next((cliente for cliente in self.clientes if cliente.get_id() == id), None)
 
     def buscar_cliente_por_nome(self, nome):
         # Descomente as linhas abaixo para usar o banco de dados
@@ -45,7 +45,7 @@ class ClienteController:
         # valores = (f"%{nome}%",)
         # clientes = self.crud.buscar_por_condicao(self.tabela, self.colunas, condicao, valores)
         # return [Cliente(*cliente) for cliente in clientes]
-        return [cliente for cliente in self.clientes if nome.lower() in cliente.nome.lower()]
+        return [cliente for cliente in self.clientes if nome.lower() in cliente.get_nome().lower()]
 
     def atualizar_cliente(self, id, nome, cpf, endereco):
         print(id, nome, cpf, endereco)
@@ -54,11 +54,11 @@ class ClienteController:
         # self.crud.atualizar(self.tabela, self.colunas[1:], valores, "id", id)  # Exclui o 'id'
         cliente = self.buscar_cliente_por_id(id)
         if cliente:
-            cliente.nome = nome
-            cliente.cpf = cpf
-            cliente.endereco = endereco
+            cliente.set_nome(nome)  # Atualiza o nome
+            cliente.set_cpf(cpf)  # Atualiza o cpf
+            cliente.set_endereco(endereco)  # Atualiza o endereco
 
     def excluir_cliente(self, id):
         # Descomente as linhas abaixo para usar o banco de dados
         # self.crud.excluir(self.tabela, "id", id)
-        self.clientes = [cliente for cliente in self.clientes if cliente.id != id]
+        self.clientes = [cliente for cliente in self.clientes if cliente.get_id() != id]

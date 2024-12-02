@@ -13,7 +13,7 @@ class GestaoClientes(tk.Frame):
     def showGrid(self, cliente_controller):
         self.pack(fill=tk.BOTH, expand=True)
         colunas = ["ID", "Nome", "CPF", "Endereço"]
-        self.dados = [(cliente.id, cliente.nome, cliente.cpf, cliente.endereco) for cliente in cliente_controller.listar_clientes()]
+        self.dados = [(cliente.get_id(), cliente.get_nome(), cliente.get_cpf(), cliente.get_endereco()) for cliente in cliente_controller.listar_clientes()]
         self.titulo = criar_titulo(self, "Gerenciamento de Cliente", "GestaoClientes", fonte=("Arial", 16), pady=5)
         self.mensagem_label = criar_mensagem(self, "GestaoClientes", "", tipo="sucesso")
         self.button_frame = criar_frame(self, "GestaoClientes", lado=tk.TOP)

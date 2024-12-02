@@ -11,6 +11,67 @@ class VendaController:
         self.vendas = []
         self.next_id = 1  # Inicializa o próximo ID
 
+        self.vendas_teste = [
+            {
+                "cliente_id": 1,
+                "vendedor_id": 2,
+                "data_venda": "2023-01-01",
+                "forma_pagamento": "Cartão de Crédito",
+                "quantidade_parcelas": 3,
+                "itens": [
+                    {"produto_id": 1, "quantidade": 2, "valor_unitario": 100.0},
+                    {"produto_id": 2, "quantidade": 1, "valor_unitario": 200.0}
+                ]
+            },
+            {
+                "cliente_id": 2,
+                "vendedor_id": 2,
+                "data_venda": "2023-08-02",
+                "forma_pagamento": "Dinheiro",
+                "quantidade_parcelas": 1,
+                "itens": [
+                    {"produto_id": 2, "quantidade": 3, "valor_unitario": 200.0}
+                ]
+            },
+            {
+                "cliente_id": 3,
+                "vendedor_id": 3,
+                "data_venda": "2024-05-03",
+                "forma_pagamento": "Boleto",
+                "quantidade_parcelas": 1,
+                "itens": [
+                    {"produto_id": 3, "quantidade": 1, "valor_unitario": 300.0}
+                ]
+            },
+            {
+                "cliente_id": 4,
+                "vendedor_id": 3,
+                "data_venda": "2024-11-04",
+                "forma_pagamento": "Cartão de Crédito",
+                "quantidade_parcelas": 2,
+                "itens": [
+                    {"produto_id": 1, "quantidade": 1, "valor_unitario": 100.0},
+                    {"produto_id": 2, "quantidade": 2, "valor_unitario": 200.0}
+                ]
+            }
+        ]
+
+        for venda in self.vendas_teste:
+            nova_venda = self.cadastrar_venda(
+                venda["cliente_id"],
+                venda["vendedor_id"],
+                venda["data_venda"],
+                venda["forma_pagamento"],
+                venda["quantidade_parcelas"]
+            )
+            for item in venda["itens"]:
+                self.adicionar_item_venda(
+                    nova_venda.id,
+                    item["produto_id"],
+                    item["quantidade"],
+                    item["valor_unitario"]
+                )
+
     def cadastrar_venda(self, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas=None):
         venda = Venda(self.next_id, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas)
         self.vendas.append(venda)
@@ -49,7 +110,7 @@ class VendaController:
 
     def registrar_venda(self, venda):
         cliente_id = venda["cliente"]["id"]
-        vendedor_id = venda["vendedor"]["id"]  # pega o id do vendedor logado no sistema no main app
+        vendedor_id = venda["vendedor"].get_id()  # pega o id do vendedor logado no sistema no main app
         data_venda = venda["data"]  # Data atual
         forma_pagamento = venda["forma_pagamento"]
         quantidade_parcelas = venda["parcelas"]
@@ -97,3 +158,14 @@ class VendaController:
                 produtos_adicionados[i] = (produto[0], produto[1], nova_quantidade, produto[3], produto[4], valor_total)
                 break
         return produtos_adicionados
+    
+    def listar_vendas(self):
+        return self.vendas
+
+    def exportar_relatorio_csv(self, caminho_arquivo, dados):
+        import csv
+        with open(caminho_arquivo, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Id", "Cliente", "Produto", "Quantidade", "Vendedor", "Forma de Pagamento", "Data"])
+            for linha in dados:
+                writer.writerow([linha[0], linha[1], linha[2], linha[3], linha[4], linha[5]])

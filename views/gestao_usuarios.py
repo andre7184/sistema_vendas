@@ -13,7 +13,7 @@ class GestaoUsuarios(tk.Frame):
     def showGrid(self, usuario_controller):
         self.pack(fill=tk.BOTH, expand=True)
         colunas = ["ID", "Nome", "Login", "Tipo"]
-        self.dados = [(usuario.id, usuario.nome, usuario.login, usuario.tipo) for usuario in usuario_controller.listar_usuarios()]
+        self.dados = [(usuario.get_id(), usuario.get_nome(), usuario.get_login(), usuario.get_tipo()) for usuario in usuario_controller.listar_usuarios()]
         self.titulo = criar_titulo(self, "Gerenciamento de Usuários", "GestaoUsuarios", fonte=("Arial", 16), pady=5)
         self.mensagem_label = criar_mensagem(self, "GestaoUsuarios", "", tipo="sucesso")
         self.button_frame = criar_frame(self, "GestaoUsuarios", lado=tk.TOP)
@@ -42,7 +42,7 @@ class GestaoUsuarios(tk.Frame):
         selected_item = self.lista_usuarios.tree.selection()[0]
         usuario_id = self.lista_usuarios.tree.item(selected_item)['values'][0]
         usuario_obj = self.usuario_controller.buscar_usuario_por_id(usuario_id)
-        self.editar_usuario((usuario_obj.id, usuario_obj.nome, usuario_obj.login, usuario_obj.tipo))
+        self.editar_usuario((usuario_obj.get_id(), usuario_obj.get_nome(), usuario_obj.get_login(), usuario_obj.get_tipo()))
 
     def excluir_usuario_selecionado(self):
         selected_item = self.lista_usuarios.tree.selection()[0]

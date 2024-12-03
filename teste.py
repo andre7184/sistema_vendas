@@ -7,15 +7,15 @@ class SistemaVendas:
     def __init__(self, root):
         self.root = root
         self.root.title("Sistema de Vendas")
-        self.root.geometry("400x300")
+        self.root.geometry("800x600")
         self.root.configure(padx=20, pady=20)
 
         # Conexão com o banco de dados
         try:
             self.conn = mysql.connector.connect(
                 host="localhost",
-                user="andre",
-                password="Amb@8484",
+                user="root",
+                password="",
                 database="sistema_vendas_teste"
             )
             self.cursor = self.conn.cursor()
@@ -130,31 +130,117 @@ class SistemaVendas:
         self.entry_endereco.grid(row=2, column=1, padx=10, pady=10)
 
         tk.Label(self.root, text="Forma de Pagamento").grid(row=3, column=0, sticky="e", padx=10, pady=10)
-        self.entry_pagamento = tk.Entry(self.root)
-        self.entry_pagamento.grid(row=3, column=1, padx=10, pady=10)
+        self.forma_pagamento_var = tk.StringVar(self.root)
+        self.forma_pagamento_var.set("À vista")  # Valor padrão
+        self.option_menu_pagamento = tk.OptionMenu(self.root, self.forma_pagamento_var, "À vista", "Parcelado", command=self.atualizar_parcelas)
+        self.option_menu_pagamento.grid(row=3, column=1, padx=10, pady=10)
 
-        tk.Label(self.root, text="Vendedor").grid(row=4, column=0, sticky="e", padx=10, pady=10)
+        tk.Label(self.root, text="Parcelas").grid(row=4, column=0, sticky="e", padx=10, pady=10)
+        self.entry_parcelas = tk.Entry(self.root)
+        self.entry_parcelas.grid(row=4, column=1, padx=10, pady=10)
+        self.entry_parcelas.insert(0, "1")  # Valor padrão para "À vista"
+        self.entry_parcelas.config(state='readonly')  # Inicialmente em modo somente leitura
+
+        # Vendedor é o usuário atual logado
+        tk.Label(self.root, text="Vendedor").grid(row=5, column=0, sticky="e", padx=10, pady=10)
         self.entry_vendedor = tk.Entry(self.root)
-        self.entry_vendedor.grid(row=4, column=1, padx=10, pady=10)
+        self.entry_vendedor.insert(0, self.usuario_logado[0])  # Insere o ID do usuário logado
+        self.entry_vendedor.config(state='readonly')
+        self.entry_vendedor.grid(row=5, column=1, padx=10, pady=10)
 
-        # Lista de Produtos Vendidos
+        # Botão para abrir a janela de seleção de produtos
+        tk.Button(self.root, text="Adicionar Produto", command=self.abrir_selecao_produtos).grid(row=6, column=1, pady=10)
+
+        # Lista de produtos selecionados
         self.lista_produtos_vendidos = []
+        self.label_produtos_selecionados = tk.Frame(self.root)
+        self.label_produtos_selecionados.grid(row=7, column=0, columnspan=2)
 
-        tk.Label(self.root, text="ID do Produto").grid(row=5, column=0, sticky="e", padx=10, pady=10)
-        self.entry_produto_id = tk.Entry(self.root)
-        self.entry_produto_id.grid(row=5, column=1, padx=10, pady=10)
+        tk.Button(self.root, text="Realizar Venda", command=self.realizar_venda).grid(row=8, column=1, pady=10)
+        tk.Button(self.root, text="Voltar Menu", command=lambda: self.abrir_menu(self.usuario_logado[2])).grid(row=8, column=2, pady=10)
+    
+    def atualizar_parcelas(self, value):
+        if value == "À vista":
+            self.entry_parcelas.config(state='normal')
+            self.entry_parcelas.delete(0, tk.END)
+            self.entry_parcelas.insert(0, "1")
+            self.entry_parcelas.config(state='readonly')
+        else:
+            self.entry_parcelas.config(state='normal')
+            self.entry_parcelas.delete(0, tk.END)
 
-        tk.Label(self.root, text="Quantidade").grid(row=6, column=0, sticky="e", padx=10, pady=10)
-        self.entry_quantidade_venda = tk.Entry(self.root)
-        self.entry_quantidade_venda.grid(row=6, column=1, padx=10, pady=10)
+    def adicionar_produto_vendido(self):
+        produto_id = self.entry_produto_id.get()
+        quantidade = self.entry_quantidade_venda.get()
+        valor_unitario = self.entry_valor_unitario.get()
 
-        tk.Label(self.root, text="Valor Unitário").grid(row=7, column=0, sticky="e", padx=10, pady=10)
-        self.entry_valor_unitario = tk.Entry(self.root)
-        self.entry_valor_unitario.grid(row=7, column=1, padx=10, pady=10)
+        if produto_id and quantidade and valor_unitario:
+            self.lista_produtos_vendidos.append({
+                'produto_id': produto_id,
+                'quantidade': quantidade,
+                'valor_unitario': valor_unitario
+            })
+            messagebox.showinfo("Sucesso", "Produto adicionado à venda!")
+        else:
+            messagebox.showwarning("Atenção", "Todos os campos são obrigatórios!")
 
-        tk.Button(self.root, text="Adicionar Produto", command=self.adicionar_produto_vendido).grid(row=8, column=1, pady=10)
-        tk.Button(self.root, text="Realizar Venda", command=self.realizar_venda).grid(row=9, column=1, pady=10)
-        tk.Button(self.root, text="Voltar Menu", command=lambda: self.abrir_menu(self.usuario_logado[2])).grid(row=9, column=2, pady=10)
+    def atualizar_lista_produtos(self):
+        texto = "\n".join([f"{produto[1]} - R${produto[2]:.2f}" for produto in self.lista_produtos_vendidos])
+        self.label_produtos_selecionados.config(text=texto)   
+
+    def adicionar_produtos_selecionados(self):
+        selecionados = self.lista_produtos.curselection()
+        total_labels = []
+        quantidade_entries = []
+
+        for i in selecionados:
+            produto_info = self.lista_produtos.get(i)
+            produto_id = produto_info.split(" - ")[0]
+            self.cursor.execute("SELECT id, nome, valor FROM produtos WHERE nome = %s", (produto_id,))
+            produto = self.cursor.fetchone()
+            produto_dict = {
+                'produto_id': produto[0],
+                'nome': produto[1],
+                'quantidade': 1,
+                'valor_unitario': produto[2]
+            }
+            self.lista_produtos_vendidos.append(produto_dict)
+            row = len(self.lista_produtos_vendidos) - 1
+            tk.Label(self.label_produtos_selecionados, text=f"{produto[1]} - R${produto[2]:.2f}").grid(row=row, column=0)
+            
+            quantidade_entry = tk.Entry(self.label_produtos_selecionados)
+            quantidade_entry.insert(0, "1")
+            quantidade_entry.grid(row=row, column=1)
+            quantidade_entry.bind("<KeyRelease>", lambda event, idx=row: self.calcular_total(event, idx))
+            quantidade_entries.append(quantidade_entry)
+            
+            total_label = tk.Label(self.label_produtos_selecionados, text=f"R${produto[2]:.2f}")
+            total_label.grid(row=row, column=2)
+            total_labels.append(total_label)
+
+        self.quantidade_entries = quantidade_entries
+        self.total_labels = total_labels
+
+    def calcular_total(self, event, i):
+        quantidade = int(self.quantidade_entries[i].get())
+        valor_unitario = float(self.lista_produtos_vendidos[i]['valor_unitario'])
+        total = quantidade * valor_unitario
+        self.total_labels[i].config(text=f"R${total:.2f}")
+
+    def abrir_selecao_produtos(self):
+        self.janela_produtos = tk.Toplevel(self.root)
+        self.janela_produtos.title("Seleção de Produtos")
+        
+        self.lista_produtos = tk.Listbox(self.janela_produtos, selectmode=tk.MULTIPLE)
+        self.lista_produtos.pack(padx=10, pady=10)
+        
+        self.cursor.execute("SELECT id, nome, valor FROM produtos")
+        produtos = self.cursor.fetchall()
+        
+        for produto in produtos:
+            self.lista_produtos.insert(tk.END, f"{produto[1]} - R${produto[2]:.2f}")
+        
+        tk.Button(self.janela_produtos, text="Adicionar", command=self.adicionar_produtos_selecionados).pack(pady=10)
 
     def cadastrar_produto(self):
         nome = self.entry_nome.get()
@@ -186,33 +272,32 @@ class SistemaVendas:
         else:
             messagebox.showwarning("Atenção", "Todos os campos são obrigatórios!")
 
-    def adicionar_produto_vendido(self):
-        produto_id = self.entry_produto_id.get()
-        quantidade = self.entry_quantidade_venda.get()
-        valor_unitario = self.entry_valor_unitario.get()
-
-        if produto_id and quantidade and valor_unitario:
-            self.lista_produtos_vendidos.append({
-                'produto_id': produto_id,
-                'quantidade': quantidade,
-                'valor_unitario': valor_unitario
-            })
-            messagebox.showinfo("Sucesso", "Produto adicionado à venda!")
-        else:
-            messagebox.showwarning("Atenção", "Todos os campos são obrigatórios!")
-
     def realizar_venda(self):
         cliente = self.entry_cliente.get()
         cpf = self.entry_cpf.get()
         endereco = self.entry_endereco.get()
-        pagamento = self.entry_pagamento.get()
-        vendedor = self.entry_vendedor.get()
+        pagamento = self.forma_pagamento_var.get()
+        qtd_parcelas = int(self.entry_parcelas.get())
+        vendedor = int(self.entry_vendedor.get())
 
-        if cliente and cpf and endereco and pagamento and vendedor:
-            self.cursor.execute("INSERT INTO vendas (cliente_nome, cliente_cpf, cliente_endereco, forma_pagamento, usuario_id) VALUES (%s, %s, %s, %s, %s)",
-                                (cliente, cpf, endereco, pagamento, vendedor))
+        if cliente and cpf and endereco and pagamento and qtd_parcelas and vendedor:
+            # Atualiza as quantidades na lista de produtos vendidos
+            for i in range(len(self.lista_produtos_vendidos)):
+                quantidade_entry = self.label_produtos_selecionados.grid_slaves(row=i, column=1)[0]
+                quantidade = int(quantidade_entry.get())
+                valor_unitario = float(self.lista_produtos_vendidos[i]['valor_unitario'])
+                total_label = self.label_produtos_selecionados.grid_slaves(row=i, column=2)[0]
+                total_label.config(text=f"R${quantidade * valor_unitario:.2f}")
+                self.lista_produtos_vendidos[i]['quantidade'] = quantidade
+
+            # Insere a venda no banco de dados
+            self.cursor.execute(
+                "INSERT INTO vendas (cliente_nome, cliente_cpf, cliente_endereco, forma_pagamento, qtd_parcelas, usuario_id) VALUES (%s, %s, %s, %s, %s, %s)",
+                (cliente, cpf, endereco, pagamento, qtd_parcelas, vendedor)
+            )
             venda_id = self.cursor.lastrowid
 
+            # Insere os itens da venda no banco de dados
             produtos_vendidos = []
             for item in self.lista_produtos_vendidos:
                 produto_id = item['produto_id']
@@ -220,8 +305,14 @@ class SistemaVendas:
                 valor_unitario = item['valor_unitario']
                 produtos_vendidos.append((venda_id, produto_id, quantidade, valor_unitario))
 
-            self.cursor.executemany("INSERT INTO itens_vendas (venda_id, produto_id, quantidade, valor_unitario) VALUES (%s, %s, %s, %s)", produtos_vendidos)
+            self.cursor.executemany(
+                "INSERT INTO itens_vendas (venda_id, produto_id, quantidade, valor_unitario) VALUES (%s, %s, %s, %s)",
+                produtos_vendidos
+            )
+
+            # Confirma a transação
             self.conn.commit()
+
             messagebox.showinfo("Sucesso", "Venda realizada com sucesso!")
             self.abrir_menu(self.usuario_logado[2])
         else:

@@ -4,7 +4,6 @@ from tkinter import messagebox
 from components.grid import Grid
 from components.itens import criar_botao, criar_frame, criar_input, criar_radio, criar_texto, criar_titulo
 from views.cadastro_cliente import CadastroCliente
-from components.scroll import ScrollableFrame
 import locale
 
 # Configura o locale para o formato de moeda brasileira

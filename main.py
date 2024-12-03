@@ -1,4 +1,7 @@
 import tkinter as tk
+import subprocess
+import time
+import requests
 from views.cadastro_usuario import CadastroUsuario
 from views.cadastro_produto import CadastroProduto
 from views.gestao_usuarios import GestaoUsuarios
@@ -6,11 +9,11 @@ from views.gestao_produtos import GestaoProdutos
 from views.realizacao_vendas import RealizacaoVendas
 from views.relatorio_vendas import RelatorioVendas
 from views.login import Login
-from views.gestao_clientes import GestaoClientes  # Nova importação
+from views.gestao_clientes import GestaoClientes
 from controllers.usuario_controller import UsuarioController
 from controllers.produto_controller import ProdutoController
 from controllers.venda_controller import VendaController
-from controllers.cliente_controller import ClienteController  # Nova importação
+from controllers.cliente_controller import ClienteController
 from components.itens import criar_frame_com_scroll, criar_titulo, criar_texto, criar_frame
 from components.cores import obter_cor
 
@@ -23,10 +26,35 @@ class App(tk.Tk):
         self.usuario_controller = UsuarioController()
         self.produto_controller = ProdutoController()
         self.venda_controller = VendaController()
-        self.cliente_controller = ClienteController()  # Inicialização do ClienteController
+        self.cliente_controller = ClienteController()
         self.current_user = None
 
-        self.show_login()
+        # Iniciar o servidor Flask
+        self.start_flask_server()
+
+        # Verificar se o servidor Flask iniciou corretamente
+        if self.check_flask_server():
+            self.show_login()
+        else:
+            self.show_error_message("Erro ao iniciar o servidor Flask.")
+
+    def start_flask_server(self):
+        self.flask_process = subprocess.Popen(['python', 'api/api.py'])
+        time.sleep(2)  # Esperar um pouco para garantir que o servidor Flask esteja rodando
+
+    def check_flask_server(self):
+        try:
+            response = requests.get('http://localhost:5000/health')
+            if response.status_code == 200 and response.json().get('status') == 'ok':
+                return True
+        except requests.ConnectionError:
+            return False
+        return False
+
+    def show_error_message(self, message):
+        self.clear_frame()
+        error_label = tk.Label(self, text=message, fg='red', font=("Arial", 16))
+        error_label.pack(pady=20)
 
     def show_login(self):
         self.clear_frame()
@@ -62,7 +90,7 @@ class App(tk.Tk):
         else:
             self.menu_relatorios.add_command(label="Visualizar Relatório de Vendas", command=self.show_visualizar_relatorio_vendas)
 
-        self.menu_clientes = tk.Menu(self.menu, tearoff=0)  # Novo menu para clientes
+        self.menu_clientes = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Clientes", menu=self.menu_clientes)
         self.menu_clientes.add_command(label="Gerenciamento de Clientes", command=self.show_gestao_clientes)
 
@@ -102,7 +130,7 @@ class App(tk.Tk):
         self.visualizar_relatorio_vendas_frame = RelatorioVendas(self, self.venda_controller, self.usuario_controller, self.cliente_controller, self.produto_controller)
         self.visualizar_relatorio_vendas_frame.pack()
 
-    def show_gestao_clientes(self):  # Novo método para exibir a gestão de clientes
+    def show_gestao_clientes(self):
         self.clear_frame()
         self.gestao_clientes_frame = GestaoClientes(self, self.cliente_controller)
         self.gestao_clientes_frame.pack()
@@ -111,6 +139,12 @@ class App(tk.Tk):
         for widget in self.winfo_children():
             widget.pack_forget()
 
+    def on_closing(self):
+        if self.flask_process:
+            self.flask_process.terminate()
+        self.destroy()
+
 if __name__ == "__main__":
     app = App()
+    app.protocol("WM_DELETE_WINDOW", app.on_closing)
     app.mainloop()

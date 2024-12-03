@@ -26,6 +26,19 @@ class Pessoa:
     def set_endereco(self, endereco):
         self._endereco = endereco
 
+    def to_dict(self):
+        return {
+            'id': self.get_id(),
+            'nome': self.get_nome(),
+            'cpf': self.get_cpf(),
+            'endereco': self.get_endereco()
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data['id'], data['nome'], data['cpf'], data['endereco'])
+
+
 class Usuario(Pessoa):
     def __init__(self, id, nome, login, senha, tipo):
         super().__init__(id, nome, None, None)
@@ -51,9 +64,24 @@ class Usuario(Pessoa):
     def set_tipo(self, tipo):
         self.__tipo = tipo
 
+    def to_dict(self):
+        return {
+            'id': self.get_id(),
+            'nome': self.get_nome(),
+            'login': self.get_login(),
+            'senha': self.get_senha(),
+            'tipo': self.get_tipo()
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data['id'], data['nome'], data['login'], data['senha'], data['tipo'])
+
+
 class Cliente(Pessoa):
     def __init__(self, id, nome, cpf, endereco):
         super().__init__(id, nome, cpf, endereco)
+
 
 class Produto:
     def __init__(self, id, nome, descricao, quantidade, valor):
@@ -62,6 +90,20 @@ class Produto:
         self.descricao = descricao
         self.quantidade = quantidade
         self.valor = valor
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'descricao': self.descricao,
+            'quantidade': self.quantidade,
+            'valor': self.valor
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data['id'], data['nome'], data['descricao'], data['quantidade'], data['valor'])
+
 
 class Venda:
     def __init__(self, id, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas=None):
@@ -74,8 +116,8 @@ class Venda:
         self.itens = []
 
     def adicionar_item(self, produto_id, quantidade, valor_unitario):
-        quantidade = int(quantidade)  # Certifique-se de que a quantidade seja um inteiro
-        valor_unitario = float(valor_unitario)  # Certifique-se de que o valor unitário seja um float
+        quantidade = int(quantidade)
+        valor_unitario = float(valor_unitario)
         if quantidade > 0:
             self.itens.append({
                 'produto_id': produto_id,
@@ -95,36 +137,19 @@ class Venda:
             'data_venda': self.data_venda
         }
 
-class SistemaVendas:
-    def __init__(self):
-        self.usuarios = []
-        self.clientes = []
-        self.produtos = []
-        self.vendas = []
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'cliente_id': self.cliente_id,
+            'vendedor_id': self.vendedor_id,
+            'data_venda': self.data_venda,
+            'forma_pagamento': self.forma_pagamento,
+            'quantidade_parcelas': self.quantidade_parcelas,
+            'itens': self.itens
+        }
 
-    def adicionar_usuario(self, id, nome, login, senha, tipo):
-        usuario = Usuario(id, nome, login, senha, tipo)
-        self.usuarios.append(usuario)
-
-    def adicionar_cliente(self, id, nome, cpf, endereco):
-        cliente = Cliente(id, nome, cpf, endereco)
-        self.clientes.append(cliente)
-
-    def adicionar_produto(self, id, nome, descricao, quantidade, valor):
-        produto = Produto(id, nome, descricao, quantidade, valor)
-        self.produtos.append(produto)
-
-    def adicionar_venda(self, id, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas=None):
-        venda = Venda(id, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas)
-        self.vendas.append(venda)
-
-    def adicionar_item_venda(self, venda_id, produto_id, quantidade, valor_unitario):
-        venda = next((v for v in self.vendas if v.id == venda_id), None)
-        if venda:
-            venda.adicionar_item(produto_id, quantidade, valor_unitario)
-
-    def gerar_relatorio_venda(self, venda_id):
-        venda = next((v for v in self.vendas if v.id == venda_id), None)
-        if venda:
-            return venda.gerar_relatorio(self)
-        return None
+    @classmethod
+    def from_dict(cls, data):
+        venda = cls(data['id'], data['cliente_id'], data['vendedor_id'], data['data_venda'], data['forma_pagamento'], data.get('quantidade_parcelas'))
+        venda.itens = data.get('itens', [])
+        return venda

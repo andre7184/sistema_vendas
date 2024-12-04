@@ -36,10 +36,10 @@ class CadastroProduto(tk.Frame):
         valor = float(dados["Valor"])
         try:
             if self.produto:
-                self.produto_controller.atualizar_usuario(self.produto.id, nome, descricao, quantidade, valor)
+                self.produto_controller.atualizar_produto(self.produto.id, nome, descricao, quantidade, valor)
                 mensagem = "Produto atualizado com sucesso!"
             else:
-                self.produto_controller.cadastrar_usuario(nome, descricao, quantidade, valor)
+                self.produto_controller.cadastrar_produto(nome, descricao, quantidade, valor)
                 mensagem = "Produto cadastrado com sucesso!"
             self.master.atualizar_lista()
             self.master.mostrar_mensagem(mensagem, "sucesso")

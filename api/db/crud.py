@@ -6,7 +6,7 @@ class CRUD:
 
     def criar(self, tabela, colunas, valores):
         query = f"INSERT INTO {tabela} ({', '.join(colunas)}) VALUES ({', '.join(['%s'] * len(valores))})"
-        self.db_manager.executar_query(query, valores)
+        return self.db_manager.executar_query(query, valores)
 
     def listar(self, tabela, colunas):
         query = f"SELECT {', '.join(colunas)} FROM {tabela}"

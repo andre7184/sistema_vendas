@@ -42,7 +42,7 @@ class GestaoClientes(tk.Frame):
         selected_item = self.lista_clientes.tree.selection()[0]
         cliente_id = self.lista_clientes.tree.item(selected_item)['values'][0]
         cliente_obj = self.cliente_controller.buscar_cliente_por_id(cliente_id)
-        self.editar_cliente((cliente_obj.id, cliente_obj.nome, cliente_obj.cpf, cliente_obj.endereco))
+        self.editar_cliente((cliente_obj.get_id(), cliente_obj.get_nome(), cliente_obj.get_cpf(), cliente_obj.get_endereco()))
 
     def excluir_cliente_selecionado(self):
         selected_item = self.lista_clientes.tree.selection()[0]

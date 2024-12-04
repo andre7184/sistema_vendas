@@ -5,7 +5,6 @@ class ClienteController:
     def __init__(self):
         self.api_url = "http://localhost:5000/clientes"
         self.clientes = []
-        self.next_id = 1  # Inicializa o próximo ID
 
     def cadastrar_cliente(self, nome, cpf, endereco):
         data = {"nome": nome, "cpf": cpf, "endereco": endereco}
@@ -14,7 +13,7 @@ class ClienteController:
             cliente_data = response.json()
             cliente = Cliente(cliente_data['id'], nome, cpf, endereco)
             self.clientes.append(cliente)
-            return cliente
+            return cliente_data['id']  # Retornar o ID do cliente criado
         else:
             print(f"Erro ao cadastrar cliente: {response.json()}")
             return None
@@ -23,12 +22,17 @@ class ClienteController:
         response = requests.get(self.api_url)
         if response.status_code == 200:
             clientes_data = response.json()
-            self.clientes = [Cliente(cliente['id'], cliente['nome'], cliente['cpf'], cliente['endereco']) for cliente in clientes_data]
+            print("Dados recebidos da API:", clientes_data)  # Verificar os dados retornados
+            if isinstance(clientes_data, list):
+                self.clientes = [Cliente(cliente['id'], cliente['nome'], cliente['cpf'], cliente['endereco']) for cliente in clientes_data]
+            else:
+                print("Erro: A resposta da API não é uma lista de clientes.")
+                self.clientes = []
             return self.clientes
         else:
             print(f"Erro ao listar clientes: {response.json()}")
             return []
-
+    
     def buscar_cliente_por_id(self, id):
         response = requests.get(f"{self.api_url}/{id}")
         if response.status_code == 200:

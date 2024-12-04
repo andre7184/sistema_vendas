@@ -31,3 +31,13 @@ class CRUD:
         query = f"SELECT {', '.join(colunas)} FROM {tabela} WHERE {condicao}"
         resultado = self.db_manager.buscar_um(query, valores)
         return resultado
+
+    def buscar_por_nome(self, tabela, colunas, nome_coluna, nome_valor):
+        query = f"SELECT {', '.join(colunas)} FROM {tabela} WHERE {nome_coluna} LIKE %s"
+        resultados = self.db_manager.buscar_todos(query, (f"%{nome_valor}%",))
+        return resultados
+
+    def buscar_por_data(self, tabela, colunas, data_coluna, data_valor):
+        query = f"SELECT {', '.join(colunas)} FROM {tabela} WHERE {data_coluna} = %s"
+        resultados = self.db_manager.buscar_todos(query, (data_valor,))
+        return resultados

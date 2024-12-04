@@ -105,6 +105,25 @@ class Produto:
         return cls(data['id'], data['nome'], data['descricao'], data['quantidade'], data['valor'])
 
 
+class ItemVenda:
+    def __init__(self, venda_id, produto_id, quantidade, valor_unitario):
+        self.venda_id = venda_id
+        self.produto_id = produto_id
+        self.quantidade = quantidade
+        self.valor_unitario = valor_unitario
+
+    def to_dict(self):
+        return {
+            'venda_id': self.venda_id,
+            'produto_id': self.produto_id,
+            'quantidade': self.quantidade,
+            'valor_unitario': self.valor_unitario
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data['venda_id'], data['produto_id'], data['quantidade'], data['valor_unitario'])
+
 class Venda:
     def __init__(self, id, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas=None):
         self.id = id
@@ -119,11 +138,8 @@ class Venda:
         quantidade = int(quantidade)
         valor_unitario = float(valor_unitario)
         if quantidade > 0:
-            self.itens.append({
-                'produto_id': produto_id,
-                'quantidade': quantidade,
-                'valor_unitario': valor_unitario
-            })
+            item_venda = ItemVenda(self.id, produto_id, quantidade, valor_unitario)
+            self.itens.append(item_venda)
 
     def gerar_relatorio(self, cliente_controller, usuario_controller):
         cliente = cliente_controller.buscar_cliente_por_id(self.cliente_id)
@@ -132,8 +148,8 @@ class Venda:
             'id': self.id,
             'cliente': cliente.get_nome() if cliente else 'Desconhecido',
             'vendedor': vendedor.get_nome() if vendedor else 'Desconhecido',
-            'produtos': [item['produto_id'] for item in self.itens],
-            'valor_total': sum(item['quantidade'] * item['valor_unitario'] for item in self.itens),
+            'produtos': [item.produto_id for item in self.itens],
+            'valor_total': sum(item.quantidade * item.valor_unitario for item in self.itens),
             'data_venda': self.data_venda
         }
 
@@ -145,11 +161,11 @@ class Venda:
             'data_venda': self.data_venda,
             'forma_pagamento': self.forma_pagamento,
             'quantidade_parcelas': self.quantidade_parcelas,
-            'itens': self.itens
+            'itens': [item.to_dict() for item in self.itens]
         }
 
     @classmethod
     def from_dict(cls, data):
         venda = cls(data['id'], data['cliente_id'], data['vendedor_id'], data['data_venda'], data['forma_pagamento'], data.get('quantidade_parcelas'))
-        venda.itens = data.get('itens', [])
+        venda.itens = [ItemVenda.from_dict(item) for item in data.get('itens', [])]
         return venda

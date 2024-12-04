@@ -1,64 +1,67 @@
-from db.models import Cliente
-#from db.crud import CRUD
+import requests
+from controllers.models import Cliente
 
 class ClienteController:
     def __init__(self):
-        #self.crud = CRUD()
-        self.tabela = "clientes"
-        self.colunas = ["id", "nome", "cpf", "endereco"]
+        self.api_url = "http://localhost:5000/clientes"
         self.clientes = []
         self.next_id = 1  # Inicializa o próximo ID
-        clientes_teste = [
-            {"nome": "Cliente A", "cpf": "111.111.111-11", "endereco": "Endereço A"},
-            {"nome": "Cliente B", "cpf": "222.222.222-22", "endereco": "Endereço B"},
-            {"nome": "Cliente C", "cpf": "333.333.333-33", "endereco": "Endereço C"},
-            {"nome": "Cliente D", "cpf": "444.444.444-44", "endereco": "Endereço D"}
-        ]
-        for cliente in clientes_teste:
-            self.cadastrar_cliente(cliente["nome"], cliente["cpf"], cliente["endereco"])
 
     def cadastrar_cliente(self, nome, cpf, endereco):
-        cliente = Cliente(self.next_id, nome, cpf, endereco)
-        self.clientes.append(cliente)
-        self.next_id += 1
-        # Descomente as linhas abaixo para usar o banco de dados
-        # valores = (nome, cpf, endereco)
-        # self.crud.criar(self.tabela, self.colunas[1:], valores)  # Exclui o 'id'
-        return cliente
+        data = {"nome": nome, "cpf": cpf, "endereco": endereco}
+        response = requests.post(self.api_url, json=data)
+        if response.status_code == 201:
+            cliente_data = response.json()
+            cliente = Cliente(cliente_data['id'], nome, cpf, endereco)
+            self.clientes.append(cliente)
+            return cliente
+        else:
+            print(f"Erro ao cadastrar cliente: {response.json()}")
+            return None
 
     def listar_clientes(self):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # clientes = self.crud.listar(self.tabela, self.colunas)
-        # return [Cliente(*cliente) for cliente in clientes]
-        return self.clientes
+        response = requests.get(self.api_url)
+        if response.status_code == 200:
+            clientes_data = response.json()
+            self.clientes = [Cliente(cliente['id'], cliente['nome'], cliente['cpf'], cliente['endereco']) for cliente in clientes_data]
+            return self.clientes
+        else:
+            print(f"Erro ao listar clientes: {response.json()}")
+            return []
 
     def buscar_cliente_por_id(self, id):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # cliente = self.crud.buscar_por_id(self.tabela, self.colunas, "id", id)
-        # if cliente:
-        #     return Cliente(*cliente)
-        return next((cliente for cliente in self.clientes if cliente.get_id() == id), None)
+        response = requests.get(f"{self.api_url}/{id}")
+        if response.status_code == 200:
+            cliente_data = response.json()
+            return Cliente(cliente_data['id'], cliente_data['nome'], cliente_data['cpf'], cliente_data['endereco'])
+        else:
+            print(f"Erro ao buscar cliente por ID: {response.json()}")
+            return None
 
     def buscar_cliente_por_nome(self, nome):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # condicao = "nome LIKE %s"
-        # valores = (f"%{nome}%",)
-        # clientes = self.crud.buscar_por_condicao(self.tabela, self.colunas, condicao, valores)
-        # return [Cliente(*cliente) for cliente in clientes]
-        return [cliente for cliente in self.clientes if nome.lower() in cliente.get_nome().lower()]
+        response = requests.get(self.api_url, params={"nome": nome})
+        if response.status_code == 200:
+            clientes_data = response.json()
+            return [Cliente(cliente['id'], cliente['nome'], cliente['cpf'], cliente['endereco']) for cliente in clientes_data]
+        else:
+            print(f"Erro ao buscar cliente por nome: {response.json()}")
+            return []
 
     def atualizar_cliente(self, id, nome, cpf, endereco):
-        print(id, nome, cpf, endereco)
-        # Descomente as linhas abaixo para usar o banco de dados
-        # valores = (nome, cpf, endereco)
-        # self.crud.atualizar(self.tabela, self.colunas[1:], valores, "id", id)  # Exclui o 'id'
-        cliente = self.buscar_cliente_por_id(id)
-        if cliente:
-            cliente.set_nome(nome)  # Atualiza o nome
-            cliente.set_cpf(cpf)  # Atualiza o cpf
-            cliente.set_endereco(endereco)  # Atualiza o endereco
+        data = {"nome": nome, "cpf": cpf, "endereco": endereco}
+        response = requests.put(f"{self.api_url}/{id}", json=data)
+        if response.status_code == 200:
+            cliente = self.buscar_cliente_por_id(id)
+            if cliente:
+                cliente.set_nome(nome)
+                cliente.set_cpf(cpf)
+                cliente.set_endereco(endereco)
+        else:
+            print(f"Erro ao atualizar cliente: {response.json()}")
 
     def excluir_cliente(self, id):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # self.crud.excluir(self.tabela, "id", id)
-        self.clientes = [cliente for cliente in self.clientes if cliente.get_id() != id]
+        response = requests.delete(f"{self.api_url}/{id}")
+        if response.status_code == 200:
+            self.clientes = [cliente for cliente in self.clientes if cliente.get_id() != id]
+        else:
+            print(f"Erro ao excluir cliente: {response.json()}")

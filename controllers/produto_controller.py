@@ -1,70 +1,68 @@
-from db.models import Produto
-#from db.crud import CRUD
+import requests
+from controllers.models import Produto
 
 class ProdutoController:
     def __init__(self):
-        #self.crud = CRUD()
-        self.tabela = "produtos"
-        self.colunas = ["id", "nome", "descricao", "quantidade", "valor"]
+        self.api_url = "http://localhost:5000/produtos"
         self.produtos = []
         self.next_id = 1  # Inicializa o próximo ID
-        produtos_teste = [
-            {"nome": "Produto A", "descricao": "Descrição do Produto A", "quantidade": 10, "valor": 100.0},
-            {"nome": "Produto B", "descricao": "Descrição do Produto B", "quantidade": 20, "valor": 200.0},
-            {"nome": "Produto C", "descricao": "Descrição do Produto C", "quantidade": 30, "valor": 300.0},
-            {"nome": "Produto D", "descricao": "Descrição do Produto D", "quantidade": 40, "valor": 400.0},
-            {"nome": "Produto E", "descricao": "Descrição do Produto E", "quantidade": 50, "valor": 500.0},
-            {"nome": "Produto F", "descricao": "Descrição do Produto F", "quantidade": 60, "valor": 600.0},
-            {"nome": "Produto G", "descricao": "Descrição do Produto G", "quantidade": 70, "valor": 700.0},
-            {"nome": "Produto H", "descricao": "Descrição do Produto H", "quantidade": 80, "valor": 800.0},
-            {"nome": "Produto I", "descricao": "Descrição do Produto I", "quantidade": 90, "valor": 900.0},
-            {"nome": "Produto J", "descricao": "Descrição do Produto J", "quantidade": 100, "valor": 1000.0}
-        ]
-        for produto in produtos_teste:
-            self.cadastrar_produto(produto["nome"], produto["descricao"], produto["quantidade"], produto["valor"])
 
     def cadastrar_produto(self, nome, descricao, quantidade, valor):
-        produto = Produto(self.next_id, nome, descricao, quantidade, valor)
-        self.produtos.append(produto)
-        self.next_id += 1
-        # Descomente as linhas abaixo para usar o banco de dados
-        # valores = (nome, descricao, quantidade, valor)
-        # self.crud.criar(self.tabela, self.colunas[1:], valores)  # Exclui o 'id'
-        return produto
+        data = {"nome": nome, "descricao": descricao, "quantidade": quantidade, "valor": valor}
+        response = requests.post(self.api_url, json=data)
+        if response.status_code == 201:
+            produto_data = response.json()
+            produto = Produto(produto_data['id'], nome, descricao, quantidade, valor)
+            self.produtos.append(produto)
+            return produto
+        else:
+            print(f"Erro ao cadastrar produto: {response.json()}")
+            return None
 
     def listar_produtos(self):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # produtos = self.crud.listar(self.tabela, self.colunas)
-        # return [Produto(*produto) for produto in produtos]
-        return self.produtos
+        response = requests.get(self.api_url)
+        if response.status_code == 200:
+            produtos_data = response.json()
+            self.produtos = [Produto(produto['id'], produto['nome'], produto['descricao'], produto['quantidade'], produto['valor']) for produto in produtos_data]
+            return self.produtos
+        else:
+            print(f"Erro ao listar produtos: {response.json()}")
+            return []
 
     def buscar_produto_por_id(self, id):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # produto = self.crud.buscar_por_id(self.tabela, self.colunas, "id", id)
-        # if produto:
-        #     return Produto(*produto)
-        return next((produto for produto in self.produtos if produto.id == id), None)
+        response = requests.get(f"{self.api_url}/{id}")
+        if response.status_code == 200:
+            produto_data = response.json()
+            return Produto(produto_data['id'], produto_data['nome'], produto_data['descricao'], produto_data['quantidade'], produto_data['valor'])
+        else:
+            print(f"Erro ao buscar produto por ID: {response.json()}")
+            return None
 
     def buscar_produto_por_nome(self, nome):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # condicao = "nome LIKE %s"
-        # valores = (f"%{nome}%",)
-        # produtos = self.crud.buscar_por_condicao(self.tabela, self.colunas, condicao, valores)
-        # return [Produto(*produto) for produto in produtos]
-        return [produto for produto in self.produtos if nome.lower() in produto.nome.lower()]
+        response = requests.get(self.api_url, params={"nome": nome})
+        if response.status_code == 200:
+            produtos_data = response.json()
+            return [Produto(produto['id'], produto['nome'], produto['descricao'], produto['quantidade'], produto['valor']) for produto in produtos_data]
+        else:
+            print(f"Erro ao buscar produto por nome: {response.json()}")
+            return []
 
     def atualizar_produto(self, id, nome, descricao, quantidade, valor):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # valores = (nome, descricao, quantidade, valor)
-        # self.crud.atualizar(self.tabela, self.colunas[1:], valores, "id", id)  # Exclui o 'id'
-        produto = self.buscar_produto_por_id(id)
-        if produto:
-            produto.nome = nome
-            produto.descricao = descricao
-            produto.quantidade = quantidade
-            produto.valor = valor
+        data = {"nome": nome, "descricao": descricao, "quantidade": quantidade, "valor": valor}
+        response = requests.put(f"{self.api_url}/{id}", json=data)
+        if response.status_code == 200:
+            produto = self.buscar_produto_por_id(id)
+            if produto:
+                produto.nome = nome
+                produto.descricao = descricao
+                produto.quantidade = quantidade
+                produto.valor = valor
+        else:
+            print(f"Erro ao atualizar produto: {response.json()}")
 
     def excluir_produto(self, id):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # self.crud.excluir(self.tabela, "id", id)
-        self.produtos = [produto for produto in self.produtos if produto.id != id]
+        response = requests.delete(f"{self.api_url}/{id}")
+        if response.status_code == 200:
+            self.produtos = [produto for produto in self.produtos if produto.id != id]
+        else:
+            print(f"Erro ao excluir produto: {response.json()}")

@@ -1,68 +1,68 @@
-from db.models import Usuario
-#from db.crud import CRUD
+import requests
+from controllers.models import Usuario
 
 class UsuarioController:
     def __init__(self):
-        #self.crud = CRUD()
-        self.tabela = "usuarios"
-        self.colunas = ["id", "nome", "login", "senha", "tipo"]
+        self.api_url = "http://localhost:5000/usuarios"
         self.usuarios = []
         self.next_id = 1  # Inicializa o próximo ID
-        usuarios_teste = [
-            {"nome": "Admin", "login": "admin", "senha": "admin123", "tipo": "Administrador"},
-            {"nome": "Joao", "login": "joao", "senha": "123", "tipo": "Vendedor"},
-            {"nome": "Maria", "login": "maria", "senha": "1425", "tipo": "Vendedor"},
-            {"nome": "Andre", "login": "andre", "senha": "123", "tipo": "Vendedor"},
-        ]
-        for usuario in usuarios_teste:
-            self.cadastrar_usuario(usuario["nome"], usuario["login"], usuario["senha"], usuario["tipo"])
 
     def cadastrar_usuario(self, nome, login, senha, tipo):
-        usuario = Usuario(self.next_id, nome, login, senha, tipo)
-        self.usuarios.append(usuario)
-        self.next_id += 1
-        # Descomente as linhas abaixo para usar o banco de dados
-        # valores = (nome, cpf, endereco, login, senha, tipo)
-        # self.crud.criar(self.tabela, self.colunas[1:], valores)  # Exclui o 'id'
-        return usuario
+        data = {"nome": nome, "login": login, "senha": senha, "tipo": tipo}
+        response = requests.post(self.api_url, json=data)
+        if response.status_code == 201:
+            usuario_data = response.json()
+            usuario = Usuario(usuario_data['id'], nome, login, senha, tipo)
+            self.usuarios.append(usuario)
+            return usuario
+        else:
+            print(f"Erro ao cadastrar usuário: {response.json()}")
+            return None
 
     def listar_usuarios(self):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # usuarios = self.crud.listar(self.tabela, self.colunas)
-        # return [Usuario(*usuario) for usuario in usuarios]
-        return self.usuarios
+        response = requests.get(self.api_url)
+        if response.status_code == 200:
+            usuarios_data = response.json()
+            self.usuarios = [Usuario(usuario['id'], usuario['nome'], usuario['login'], usuario['senha'], usuario['tipo']) for usuario in usuarios_data]
+            return self.usuarios
+        else:
+            print(f"Erro ao listar usuários: {response.json()}")
+            return []
 
     def buscar_usuario_por_id(self, id):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # usuario = self.crud.buscar_por_id(self.tabela, self.colunas, "id", id)
-        # if usuario:
-        #     return Usuario(*usuario)
-        return next((usuario for usuario in self.usuarios if usuario.get_id() == id), None)
+        response = requests.get(f"{self.api_url}/{id}")
+        if response.status_code == 200:
+            usuario_data = response.json()
+            return Usuario(usuario_data['id'], usuario_data['nome'], usuario_data['login'], usuario_data['senha'], usuario_data['tipo'])
+        else:
+            print(f"Erro ao buscar usuário por ID: {response.json()}")
+            return None
 
     def atualizar_usuario(self, id, nome, login, senha, tipo):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # valores = (nome, cpf, endereco, login, senha, tipo)
-        # self.crud.atualizar(self.tabela, self.colunas[1:], valores, "id", id)  # Exclui o 'id'
-        usuario = self.buscar_usuario_por_id(id)
-        if usuario:
-            usuario.set_nome(nome)  # Atualiza o nome
-            usuario.set_login(login)  # Atualiza o login
-            usuario.set_senha(senha)  # Atualiza a senha
-            usuario.set_tipo(tipo)  # Atualiza o tipo
+        data = {"nome": nome, "login": login, "senha": senha, "tipo": tipo}
+        response = requests.put(f"{self.api_url}/{id}", json=data)
+        if response.status_code == 200:
+            usuario = self.buscar_usuario_por_id(id)
+            if usuario:
+                usuario.set_nome(nome)
+                usuario.set_login(login)
+                usuario.set_senha(senha)
+                usuario.set_tipo(tipo)
+        else:
+            print(f"Erro ao atualizar usuário: {response.json()}")
 
     def excluir_usuario(self, id):
-        # Descomente as linhas abaixo para usar o banco de dados
-        # self.crud.excluir(self.tabela, "id", id)
-        self.usuarios = [usuario for usuario in self.usuarios if usuario.get_id() != id]
+        response = requests.delete(f"{self.api_url}/{id}")
+        if response.status_code == 200:
+            self.usuarios = [usuario for usuario in self.usuarios if usuario.get_id() != id]
+        else:
+            print(f"Erro ao excluir usuário: {response.json()}")
 
     def autenticar_usuario(self, login, senha):
-        for usuario in self.usuarios:
-            if usuario.get_login() == login and usuario.get_senha() == senha:
-                return usuario
-        # Descomente as linhas abaixo para usar o banco de dados
-        # condicao = "login = %s AND senha = %s"
-        # valores = (login, senha)
-        # usuario = self.crud.buscar_por_condicao(self.tabela, self.colunas, condicao, valores)
-        # if usuario:
-        #     return Usuario(*usuario)
-        return None
+        response = requests.get(self.api_url, params={"login": login, "senha": senha})
+        if response.status_code == 200:
+            usuario_data = response.json()
+            return Usuario(usuario_data['id'], usuario_data['nome'], usuario_data['login'], usuario_data['senha'], usuario_data['tipo'])
+        else:
+            print(f"Erro ao autenticar usuário: {response.json()}")
+            return None

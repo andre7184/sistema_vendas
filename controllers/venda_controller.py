@@ -7,38 +7,40 @@ class VendaController:
         self.vendas = []
         self.next_id = 1  # Inicializa o próximo ID
 
-    def cadastrar_venda(self, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas=None):
+    def cadastrar_venda(self, cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas, itens):
         data = {
             "cliente_id": cliente_id,
             "vendedor_id": vendedor_id,
             "data_venda": data_venda,
             "forma_pagamento": forma_pagamento,
             "quantidade_parcelas": quantidade_parcelas,
-            "itens": []
+            "itens": itens
         }
         response = requests.post(self.api_url, json=data)
         if response.status_code == 201:
             venda_data = response.json()
-            venda = Venda(venda_data['id'], cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas)
+            venda = Venda(venda_data['venda_id'], cliente_id, vendedor_id, data_venda, forma_pagamento, quantidade_parcelas)
+            for item in venda_data['itens']:
+                venda.adicionar_item(item['produto_id'], item['quantidade'], item['valor_unitario'])
             self.vendas.append(venda)
             return venda
         else:
             print(f"Erro ao cadastrar venda: {response.json()}")
             return None
-
-    def adicionar_item_venda(self, venda_id, produto_id, quantidade, valor_unitario):
-        venda = next((v for v in self.vendas if v.id == venda_id), None)
-        if venda:
-            venda.adicionar_item(produto_id, quantidade, valor_unitario)
-            data = {
-                "venda_id": venda_id,
-                "produto_id": produto_id,
-                "quantidade": quantidade,
-                "valor_unitario": valor_unitario
-            }
-            response = requests.post(f"{self.api_url}/{venda_id}/itens", json=data)
-            if response.status_code != 201:
-                print(f"Erro ao adicionar item à venda: {response.json()}")
+        
+    def registrar_venda(self, venda):
+        itens = [
+            {"produto_id": item['id'], "quantidade": item['quantidade'], "valor_unitario": item['valor_unitario']}
+            for item in venda['produtos']
+        ]
+        return self.cadastrar_venda(
+            venda['cliente'].get_id(),
+            venda['vendedor'].get_id(),
+            venda['data_venda'],
+            venda['forma_pagamento'],
+            venda['quantidade_parcelas'],
+            itens
+        )
 
     def listar_vendas(self):
         response = requests.get(self.api_url)

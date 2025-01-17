@@ -46,7 +46,9 @@ class VendaController:
         response = requests.get(self.api_url)
         if response.status_code == 200:
             vendas_data = response.json()
-            self.vendas = [Venda(venda['id'], venda['cliente_id'], venda['vendedor_id'], venda['data_venda'], venda['forma_pagamento'], venda['quantidade_parcelas']) for venda in vendas_data]
+            print("Dados recebidos da API:", vendas_data)
+            self.vendas = [Venda(venda[0], venda[1], venda[2], venda[3], venda[4], venda[5]) for venda in vendas_data]
+            # self.vendas = [Venda(venda['id'], venda['cliente_id'], venda['vendedor_id'], venda['data_venda'], venda['forma_pagamento'], venda['quantidade_parcelas']) for venda in vendas_data]
             return self.vendas
         else:
             print(f"Erro ao listar vendas: {response.json()}")

@@ -1,5 +1,2 @@
-Cliente,CPF,Endereço,Pagamento,Produto,Quantidade,Vendedor,Data
-maria,0000000012,teste 2,À vista,1,2,1,2
-maria,0000000012,teste 2,À vista,2,2,1,2
-cliente teste,00000112,teste 2 ,Parcelado,1,2,10,2
-cliente teste,00000112,teste 2 ,Parcelado,2,3,10,2
+Id,Cliente,Produto,Quantidade,Vendedor,Forma de Pagamento,Data
+1,Cliente1,Vendedor1,,0,"Tue, 03 Dec 2024 00:00:00 GMT"

@@ -158,18 +158,37 @@ class Venda(Resource):
                 except Exception as e:
                     return {'message': str(e)}, 500
 
-    def post(self):
-        data = request.get_json()
-        try:
-            crud.criar('vendas', ['cliente_id', 'vendedor_id', 'data_venda', 'forma_pagamento', 'quantidade_parcelas'],
-                       [data['cliente_id'], data['vendedor_id'], data['data_venda'], data['forma_pagamento'], data['quantidade_parcelas']])
-            venda_id = crud.db_manager.cursor.lastrowid
-            for item in data['itens']:
-                crud.criar('itens_venda', ['venda_id', 'produto_id', 'quantidade', 'valor_unitario'],
-                           [venda_id, item['produto_id'], item['quantidade'], item['valor_unitario']])
-            return {'message': 'Venda criada com sucesso'}, 201
-        except Exception as e:
-            return {'message': str(e)}, 500
+def post(self):
+    data = request.get_json()
+    if data is None:
+        return {'message': 'Dados não fornecidos'}, 400
+
+    required_fields = ['cliente_id', 'vendedor_id', 'data_venda', 'forma_pagamento', 'quantidade_parcelas', 'itens']
+    for field in required_fields:
+        if field not in data or data[field] is None:
+            return {'message': f'Campo obrigatório {field} não fornecido ou é None'}, 400
+
+    try:
+        crud.criar('vendas', ['cliente_id', 'vendedor_id', 'data_venda', 'forma_pagamento', 'quantidade_parcelas'],
+                   [data['cliente_id'], data['vendedor_id'], data['data_venda'], data['forma_pagamento'], data['quantidade_parcelas']])
+        venda_id = crud.db_manager.cursor.lastrowid
+        if not venda_id:
+            return {'message': 'Erro ao criar venda'}, 500
+
+        for item in data['itens']:
+            if not isinstance(item, dict):
+                return {'message': 'Itens devem ser dicionários'}, 400
+            required_item_fields = ['produto_id', 'quantidade', 'valor_unitario']
+            for field in required_item_fields:
+                if field not in item or item[field] is None:
+                    return {'message': f'Campo obrigatório {field} em itens não fornecido ou é None'}, 400
+
+            crud.criar('itens_venda', ['venda_id', 'produto_id', 'quantidade', 'valor_unitario'],
+                       [venda_id, item['produto_id'], item['quantidade'], item['valor_unitario']])
+
+        return {'message': 'Venda criada com sucesso'}, 201
+    except Exception as e:
+        return {'message': str(e)}, 500
 
 class Usuario(Resource):
     def get(self, id=None):

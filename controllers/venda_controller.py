@@ -25,20 +25,25 @@ class VendaController:
             self.vendas.append(venda)
             return venda
         else:
-            print(f"Erro ao cadastrar venda: {response.json()}")
+            print(f"Erro ao cadastrar vendass: {response.json()}")
             return None
         
     def registrar_venda(self, venda):
-        itens = [
-            {"produto_id": item['id'], "quantidade": item['quantidade'], "valor_unitario": item['valor_unitario']}
-            for item in venda['produtos']
-        ]
+        try:
+            itens = [
+                {"produto_id": item[0], "nome": item[1], "quantidade": item[2], "valor_unitario": item[3], "desconto": item[4], "valor_total": item[5]}
+                for item in venda['produtos']
+            ]
+        except TypeError as e:
+            print(f"Erro: {e}. Certifique-se de que venda['produtos'] contenha dicionários, não tuplas.")
+            return None
+
         return self.cadastrar_venda(
-            venda['cliente'].get_id(),
+            venda['cliente']['id'],
             venda['vendedor'].get_id(),
-            venda['data_venda'],
+            venda['data'],
             venda['forma_pagamento'],
-            venda['quantidade_parcelas'],
+            venda['parcelas'],
             itens
         )
 

@@ -40,7 +40,7 @@ class App(tk.Tk):
 
     def start_flask_server(self):
         self.flask_process = subprocess.Popen(['python', 'api/api.py'])
-        time.sleep(5)  # Esperar um pouco mais para garantir que o servidor Flask esteja rodando
+        time.sleep(1)  # Esperar um pouco mais para garantir que o servidor Flask esteja rodando
 
     def check_flask_server(self):
         try:
